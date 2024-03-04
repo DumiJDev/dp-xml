@@ -28,7 +28,6 @@ public class DefaultPojolizer implements Pojolizer {
     private static final Set<Class<?>> CONSIDERED_PRIMITIVES = new HashSet<>();
 
     static {
-        // Adiciona todos os wrappers de tipos primitivos
         CONSIDERED_PRIMITIVES.add(Integer.class);
         CONSIDERED_PRIMITIVES.add(Long.class);
         CONSIDERED_PRIMITIVES.add(Byte.class);
@@ -38,16 +37,12 @@ public class DefaultPojolizer implements Pojolizer {
         CONSIDERED_PRIMITIVES.add(Boolean.class);
         CONSIDERED_PRIMITIVES.add(Character.class);
 
-        // Adiciona o tipo String
         CONSIDERED_PRIMITIVES.add(String.class);
 
-        // Adiciona tipos de data
         CONSIDERED_PRIMITIVES.add(Date.class);
         CONSIDERED_PRIMITIVES.add(java.sql.Date.class);
-        // Para todas as classes que implementam Temporal (LocalDate, LocalDateTime, etc.)
         CONSIDERED_PRIMITIVES.add(Temporal.class);
 
-        // Adiciona os tipos primitivos (necessário para campos primitivos, não para objetos)
         CONSIDERED_PRIMITIVES.add(int.class);
         CONSIDERED_PRIMITIVES.add(long.class);
         CONSIDERED_PRIMITIVES.add(byte.class);
@@ -60,7 +55,6 @@ public class DefaultPojolizer implements Pojolizer {
 
     @Override
     public <T> T convert(String xml, Class<T> clazz) throws Exception {
-        System.out.println(xml);
         if (!clazz.isAnnotationPresent(Pojolizable.class)) {
             throw new Exception();
         }
@@ -97,7 +91,13 @@ public class DefaultPojolizer implements Pojolizer {
 
                 var actualTypeArgument = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
 
-                var values = new LinkedList<>();
+                Collection<Object> values;
+
+                if (isSet(field.getType())) {
+                    values = new LinkedHashSet<>();
+                } else {
+                    values = new LinkedList<>();
+                }
 
                 for (var j = 0; j < children.getLength(); j++) {
                     var item = children.item(j);
@@ -165,6 +165,14 @@ public class DefaultPojolizer implements Pojolizer {
 
     private boolean isCollection(Class<?> clazz) {
         return Collection.class.isAssignableFrom(clazz);
+    }
+
+    private boolean isList(Class<?> clazz) {
+        return List.class.isAssignableFrom(clazz);
+    }
+
+    private boolean isSet(Class<?> clazz) {
+        return Set.class.isAssignableFrom(clazz);
     }
 
     private boolean isPrimitive(Class<?> clazz) {

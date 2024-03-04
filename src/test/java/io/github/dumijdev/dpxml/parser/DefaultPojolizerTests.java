@@ -1,11 +1,9 @@
 package io.github.dumijdev.dpxml.parser;
 
 import io.github.dumijdev.dpxml.model.Clazz;
+import io.github.dumijdev.dpxml.model.Company;
+import io.github.dumijdev.dpxml.model.Employee;
 import io.github.dumijdev.dpxml.model.Person;
-import io.github.dumijdev.dpxml.model.Pojolizable;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +14,8 @@ public class DefaultPojolizerTests {
 
     private static String xml;
     private static String clazzXml;
+    private static String employeeXml;
+    private static String companyXml;
     private static Pojolizer pojolizer;
 
     @BeforeAll
@@ -23,6 +23,8 @@ public class DefaultPojolizerTests {
         xml = "<root><name>Dumildes Paulo</name><age>77</age></root>";
         pojolizer = new DefaultPojolizer();
         clazzXml = "<root><person><name>Dumildes Paulo</name><age>77</age></person><person><name>Thiago Santana</name><age>77</age></person></root>";
+        employeeXml = "<employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee>";
+        companyXml = "<root><id></id><employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee></root>";
     }
 
     @DisplayName("Should Pojolize simple string")
@@ -53,11 +55,38 @@ public class DefaultPojolizerTests {
     void shouldReturnsAClassWithAListOfPerson() {
         var clazz = pojolizer.convert(clazzXml, Clazz.class);
 
-        clazz.getPerson().forEach(person -> System.out.println(person.getName()));
-
         Assertions.assertEquals(2, clazz.getPerson().size());
         Assertions.assertEquals("Dumildes Paulo", clazz.getPerson().get(0).getName());
         Assertions.assertEquals(77, clazz.getPerson().get(0).getAge());
+
+    }
+
+    @DisplayName("Should parse a complex object from xml string")
+    @Test
+    @SneakyThrows
+    void shouldParseAComplexObjectFromXMLString() {
+        var employee = pojolizer.convert(employeeXml, Employee.class);
+        var person = pojolizer.convert(xml, Person.class);
+
+        Assertions.assertNotNull(employee);
+        Assertions.assertNotNull(employee.getPerson());
+        Assertions.assertEquals("Dumildes Paulo", employee.getPerson().getName());
+        Assertions.assertEquals(person, employee.getPerson());
+
+    }
+
+    @DisplayName("Should parse company object from xml string")
+    @Test
+    @SneakyThrows
+    void shouldParseCompanyObjectFromXMLString() {
+        var employee = pojolizer.convert(employeeXml, Employee.class);
+        var company = pojolizer.convert(companyXml, Company.class);
+
+        Assertions.assertNotNull(company);
+        Assertions.assertEquals(1, company.getEmployees().size());
+        Assertions.assertTrue(company.getEmployees().contains(employee));
+        Assertions.assertEquals(employee, company.getEmployees().stream().findFirst().get());
+
     }
 
 }

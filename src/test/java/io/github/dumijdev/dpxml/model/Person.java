@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Pojolizable
+@Xmlizable
 @EqualsAndHashCode
 public class Person {
     private String name;

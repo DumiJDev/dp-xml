@@ -32,7 +32,7 @@ public class DefaultPojolizerTests {
     @SneakyThrows
     void shouldPojolizeSimpleString() {
 
-        var person = pojolizer.convert(xml, Person.class);
+        var person = pojolizer.pojoify(xml, Person.class);
 
         Assertions.assertNotNull(person);
         Assertions.assertEquals("Dumildes Paulo", person.getName());
@@ -44,7 +44,7 @@ public class DefaultPojolizerTests {
     @SneakyThrows
     void shouldReturnsAnInstance() {
 
-        var person = pojolizer.convert(xml, Person.class);
+        var person = pojolizer.pojoify(xml, Person.class);
 
         Assertions.assertNotNull(person);
     }
@@ -53,7 +53,7 @@ public class DefaultPojolizerTests {
     @Test
     @SneakyThrows
     void shouldReturnsAClassWithAListOfPerson() {
-        var clazz = pojolizer.convert(clazzXml, Clazz.class);
+        var clazz = pojolizer.pojoify(clazzXml, Clazz.class);
 
         Assertions.assertEquals(2, clazz.getPerson().size());
         Assertions.assertEquals("Dumildes Paulo", clazz.getPerson().get(0).getName());
@@ -65,8 +65,8 @@ public class DefaultPojolizerTests {
     @Test
     @SneakyThrows
     void shouldParseAComplexObjectFromXMLString() {
-        var employee = pojolizer.convert(employeeXml, Employee.class);
-        var person = pojolizer.convert(xml, Person.class);
+        var employee = pojolizer.pojoify(employeeXml, Employee.class);
+        var person = pojolizer.pojoify(xml, Person.class);
 
         Assertions.assertNotNull(employee);
         Assertions.assertNotNull(employee.getPerson());
@@ -79,8 +79,8 @@ public class DefaultPojolizerTests {
     @Test
     @SneakyThrows
     void shouldParseCompanyObjectFromXMLString() {
-        var employee = pojolizer.convert(employeeXml, Employee.class);
-        var company = pojolizer.convert(companyXml, Company.class);
+        var employee = pojolizer.pojoify(employeeXml, Employee.class);
+        var company = pojolizer.pojoify(companyXml, Company.class);
 
         Assertions.assertNotNull(company);
         Assertions.assertEquals(1, company.getEmployees().size());

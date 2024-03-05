@@ -21,8 +21,8 @@ import java.util.Set;
 @EqualsAndHashCode
 public class Company {
     private String id;
-    @Element(name = "employee")
+    @Element(name = "employee", namespace = "tst")
     private Set<Employee> employees;
-    @Element(name = "name", namespace = "")
+    @Element(name = "name", namespace = "tst")
     private Set<String> names;
 }

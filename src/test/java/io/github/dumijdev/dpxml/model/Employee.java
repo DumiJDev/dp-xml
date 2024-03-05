@@ -14,6 +14,6 @@ import lombok.Setter;
 @Xmlizable
 public class Employee {
     private String id;
-    @Element(name = "person")
+    @Element(namespace = "pay")
     private Person person;
 }

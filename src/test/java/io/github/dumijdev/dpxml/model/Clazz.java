@@ -12,5 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @Pojolizable
 public class Clazz {
+    @Element(namespace = "pay1")
     private List<Person> person;
 }

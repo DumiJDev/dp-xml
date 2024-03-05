@@ -1,6 +1,7 @@
 package io.github.dumijdev.dpxml.parser;
 
 import io.github.dumijdev.dpxml.model.Company;
+import io.github.dumijdev.dpxml.model.Employee;
 import io.github.dumijdev.dpxml.model.Person;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
@@ -57,5 +58,17 @@ public class DefaultXmlizerTests {
     @Test
     void shouldThrowsNullPointerException() {
         Assertions.assertThrows(NullPointerException.class, () -> xmlizer.xmlify(null));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldParseComplexObjectWithAnotherObject() {
+        var pojo = pojolizer.pojoify(employeeXml, Employee.class);
+        var pojoXml = xmlizer.xmlify(pojo);
+
+        System.out.println(pojoXml);
+
+        Assertions.assertNotNull(pojo);
+        Assertions.assertFalse(pojoXml.isEmpty());
     }
 }

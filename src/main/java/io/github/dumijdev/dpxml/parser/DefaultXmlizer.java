@@ -13,10 +13,10 @@ import static java.lang.String.format;
 public class DefaultXmlizer implements Xmlizer {
     @Override
     public String xmlify(Object obj) throws Exception {
-        return xmlify(obj, null);
+        return xmlify(obj, null, null);
     }
 
-    private String xmlify(Object obj, String namespace) throws Exception {
+    private String xmlify(Object obj, String name, String namespace) throws Exception {
         var clazz = obj.getClass();
 
         if (!clazz.isAnnotationPresent(Xmlizable.class)) {
@@ -24,7 +24,7 @@ public class DefaultXmlizer implements Xmlizer {
         }
 
         var builder = new StringBuilder();
-        String rootName = clazz.getSimpleName().toLowerCase();
+        String rootName = Objects.isNull(name) ? clazz.getSimpleName().toLowerCase() : name;
 
         if (clazz.isAnnotationPresent(RootElement.class) && Objects.isNull(namespace)) {
             var metadata = clazz.getDeclaredAnnotation(RootElement.class);
@@ -75,14 +75,14 @@ public class DefaultXmlizer implements Xmlizer {
 
             field.setAccessible(true);
 
-            String name = field.getName();
+            String name1 = field.getName();
 
             if (field.isAnnotationPresent(Element.class)) {
                 var metadata = field.getAnnotation(Element.class);
 
-                name = metadata.name().isEmpty() ? name : metadata.name();
+                name1 = metadata.name().isEmpty() ? name1 : metadata.name();
 
-                name = !(name.isEmpty() || metadata.namespace().isEmpty()) ? String.format("%s:%s", metadata.namespace(), name) : name;
+                name1 = !(name1.isEmpty() || metadata.namespace().isEmpty()) ? String.format("%s:%s", metadata.namespace(), name1) : name1;
             }
 
             if (Objects.isNull(field.get(obj))) {
@@ -98,9 +98,9 @@ public class DefaultXmlizer implements Xmlizer {
                     }
 
                     if (isPrimitive(el.getClass())) {
-                        builder.append("<").append(name).append(">")
+                        builder.append("<").append(name1).append(">")
                                 .append(el)
-                                .append("</").append(name).append(">");
+                                .append("</").append(name1).append(">");
                     } else {
                         String ns = null;
 
@@ -108,14 +108,14 @@ public class DefaultXmlizer implements Xmlizer {
                             ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
                         }
 
-                        builder.append(xmlify(el, ns));
+                        builder.append(xmlify(el, name1, ns));
                     }
                 }
             } else {
                 if (isPrimitive(field.getType())) {
-                    builder.append("<").append(name).append(">")
+                    builder.append("<").append(name1).append(">")
                             .append(field.get(obj))
-                            .append("</").append(name).append(">");
+                            .append("</").append(name1).append(">");
                 } else {
                     String ns = null;
 
@@ -123,7 +123,7 @@ public class DefaultXmlizer implements Xmlizer {
                         ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
                     }
 
-                    builder.append(xmlify(field.get(obj), ns));
+                    builder.append(xmlify(field.get(obj), name1, ns));
                 }
             }
         }

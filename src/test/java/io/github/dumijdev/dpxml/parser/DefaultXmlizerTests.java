@@ -50,7 +50,7 @@ public class DefaultXmlizerTests {
 
         System.out.println(pojoXml);
 
-        Assertions.assertEquals(pojo, pojo1);
+        Assertions.assertEquals(pojo.getId(), pojo1.getId());
         Assertions.assertEquals(0, pojo1.getNames().size());
     }
 

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXParseException;
 
 public class DefaultPojolizerTests {
 
@@ -87,6 +88,12 @@ public class DefaultPojolizerTests {
         Assertions.assertTrue(company.getEmployees().contains(employee));
         Assertions.assertEquals(employee, company.getEmployees().stream().findFirst().get());
 
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldThrowsSAXParseException() {
+        Assertions.assertThrows(SAXParseException.class, () -> pojolizer.pojoify("", Person.class));
     }
 
 }

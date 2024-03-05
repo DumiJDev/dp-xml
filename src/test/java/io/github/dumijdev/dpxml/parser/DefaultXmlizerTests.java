@@ -52,4 +52,10 @@ public class DefaultXmlizerTests {
         Assertions.assertEquals(pojo, pojo1);
         Assertions.assertEquals(0, pojo1.getNames().size());
     }
+
+    @DisplayName("Should throws NullPointerException")
+    @Test
+    void shouldThrowsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class, () -> xmlizer.xmlify(null));
+    }
 }

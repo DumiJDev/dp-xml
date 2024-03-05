@@ -123,6 +123,10 @@ public class DefaultXmlizer implements Xmlizer {
                         ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
                     }
 
+                    if (!Objects.isNull(ns) && name1.split(":").length > 1) {
+                        name1 = name1.split(":")[1];
+                    }
+
                     builder.append(xmlify(field.get(obj), name1, ns));
                 }
             }

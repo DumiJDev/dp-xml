@@ -15,14 +15,14 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Pojolizable
-@Namespaces(namespaces = {@Namespace(value = "https://1234.tes", name = "ns3")})
+@Namespaces(namespaces = {@Namespace(value = "https://1234.tes", name = "ns3"), @Namespace(value = "https://1234.tes", name = "ns4")})
 @RootElement(namespace = "ns3")
 @Xmlizable
 @EqualsAndHashCode
 public class Company {
     private String id;
-    @Element(name = "employee", namespace = "tst")
-    private Set<Employee> employees;
+    @Element(namespace = "tst")
+    private Employee employee;
     @Element(name = "name", namespace = "tst")
     private Set<String> names;
 }

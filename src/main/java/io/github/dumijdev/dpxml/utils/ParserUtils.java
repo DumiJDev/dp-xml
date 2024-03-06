@@ -68,12 +68,21 @@ public class ParserUtils {
         var children = parent.getChildNodes();
         for (var i = 0; i < children.getLength(); i++) {
             var item = children.item(i);
-            if (item.getNodeType() == Node.ELEMENT_NODE && item.getNodeName().equals(name)) {
+            System.out.println("Node: " + simpleNodeName(item.getNodeName()));
+            if (item.getNodeType() == Node.ELEMENT_NODE && simpleNodeName(item.getNodeName()).equals(name)) {
                 out.add(item);
             }
         }
 
         return out;
+    }
+
+    private static String simpleNodeName(String nodeName) {
+        if (nodeName.contains(":")){
+            return nodeName.split(":")[1];
+        } else {
+            return nodeName;
+        }
     }
 
     public static boolean isCollection(Class<?> clazz) {

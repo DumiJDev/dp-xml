@@ -16,4 +16,12 @@ public class Employee {
     private String id;
     @Element(namespace = "pay")
     private Person person;
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id='" + id + '\'' +
+                ", person=" + person +
+                '}';
+    }
 }

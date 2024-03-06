@@ -22,6 +22,7 @@ public class DefaultPojolizer implements Pojolizer {
 
     @Override
     public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+        System.out.println(xml);
         if (!clazz.isAnnotationPresent(Pojolizable.class)) {
             throw new Exception("Não é possível converter em POJO, classe: (" + clazz.getSimpleName() + ")");
         }
@@ -66,6 +67,8 @@ public class DefaultPojolizer implements Pojolizer {
                     values = new LinkedList<>();
                 }
 
+                System.out.println("Children: " + children);
+
                 for (var item : children) {
                     if (isPrimitive(actualTypeArgument)) {
                         values.add(convertValue((org.w3c.dom.Element) item, actualTypeArgument));
@@ -76,6 +79,8 @@ public class DefaultPojolizer implements Pojolizer {
                         }
 
                         var obj = pojoify(stringifyXml(item), actualTypeArgument);
+
+                        System.out.println("POJO: " + obj);
 
                         values.add(obj);
                     }

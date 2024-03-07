@@ -68,7 +68,6 @@ public class ParserUtils {
         var children = parent.getChildNodes();
         for (var i = 0; i < children.getLength(); i++) {
             var item = children.item(i);
-            System.out.println("Node: " + simpleNodeName(item.getNodeName()));
             if (item.getNodeType() == Node.ELEMENT_NODE && simpleNodeName(item.getNodeName()).equals(name)) {
                 out.add(item);
             }

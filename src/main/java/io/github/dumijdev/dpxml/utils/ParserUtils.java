@@ -76,7 +76,7 @@ public class ParserUtils {
         return out;
     }
 
-    private static String simpleNodeName(String nodeName) {
+    public static String simpleNodeName(String nodeName) {
         if (nodeName.contains(":")){
             return nodeName.split(":")[1];
         } else {

@@ -18,10 +18,10 @@ public class DefaultXmlizerTests {
     private static Xmlizer xmlizer;
 
     @BeforeAll
-    static void setup() {
+    static void setup() throws Exception {
         xml = "<root><name>Dumildes Paulo</name><age>77</age></root>";
         pojolizer = new DefaultPojolizer();
-        xmlizer = new DefaultXmlizer();
+        xmlizer = new DefaultXmlizer().registerNamespace("ns3", "https://1234.tes").registerNamespace("ns4", "https://1234.tes");
         clazzXml = "<root><person><name>Dumildes Paulo</name><age>77</age></person><person><name>Thiago Santana</name><age>77</age></person></root>";
         employeeXml = "<employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee>";
         companyXml = "<root><id></id><employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee></root>";

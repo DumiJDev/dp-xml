@@ -6,6 +6,7 @@ import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.lang.reflect.Field;
@@ -20,6 +21,18 @@ import static io.github.dumijdev.dpxml.utils.ParserUtils.*;
 
 public class DefaultPojolizer implements Pojolizer {
 
+    private final DocumentBuilder documentBuilder;
+    private final DateTimeFormatter dateFormatter;
+    private final DateTimeFormatter dateTimeFormatter;
+
+    public DefaultPojolizer() throws Exception {
+        this.documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        this.dateTimeFormatter = new DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd[ HH[:mm[:ss[.S][.SS][.SSS]]]]")
+                .toFormatter();
+    }
+
     @Override
     public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
         if (!clazz.isAnnotationPresent(Pojolizable.class)) {
@@ -27,10 +40,7 @@ public class DefaultPojolizer implements Pojolizer {
         }
         var instance = clazz.getDeclaredConstructor().newInstance();
 
-        var element = DocumentBuilderFactory
-                .newInstance()
-                .newDocumentBuilder()
-                .parse(new InputSource(new StringReader(xml))).getDocumentElement();
+        var element = documentBuilder.parse(new InputSource(new StringReader(xml))).getDocumentElement();
 
         for (var field : clazz.getDeclaredFields()) {
             if (field.isAnnotationPresent(IgnoreElement.class))
@@ -90,9 +100,7 @@ public class DefaultPojolizer implements Pojolizer {
                         continue;
                     }
 
-                    var obj = pojoify(
-                            stringifyXml(node), field.getType()
-                    );
+                    var obj = pojoify(stringifyXml(node), field.getType());
 
                     field.set(instance, obj);
                 } else throw new Exception("");
@@ -103,7 +111,7 @@ public class DefaultPojolizer implements Pojolizer {
         return instance;
     }
 
-    private void setValue(Field field, Object instance, List<Node> children) throws IllegalAccessException, NoSuchFieldException {
+    private void setValue(Field field, Object instance, List<Node> children) throws IllegalAccessException {
         if (children.isEmpty()) {
             return;
         }
@@ -140,15 +148,10 @@ public class DefaultPojolizer implements Pojolizer {
         } else if (targetType.equals(LocalDateTime.class)) {
 
             if (child.getTextContent().matches("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}")) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                return LocalDate.parse(child.getTextContent(), formatter).atStartOfDay();
+                return LocalDate.parse(child.getTextContent(), dateFormatter).atStartOfDay();
             }
 
-            DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-                    .appendPattern("yyyy-MM-dd[ HH[:mm[:ss[.S][.SS][.SSS]]]]")
-                    .toFormatter();
-
-            return LocalDateTime.parse(child.getTextContent(), formatter);
+            return LocalDateTime.parse(child.getTextContent(), dateTimeFormatter);
         } else if (targetType.equals(Date.class)) {
             throw new UnsupportedOperationException();
         } else if (targetType.equals(LocalDate.class)) {

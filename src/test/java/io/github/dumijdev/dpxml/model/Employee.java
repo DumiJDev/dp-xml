@@ -1,10 +1,7 @@
 package io.github.dumijdev.dpxml.model;
 
 import io.github.dumijdev.dpxml.stereotype.Element;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -12,16 +9,9 @@ import lombok.Setter;
 @EqualsAndHashCode
 @Pojolizable
 @Xmlizable
+@ToString
 public class Employee {
     private String id;
     @Element(namespace = "pay")
     private Person person;
-
-    @Override
-    public String toString() {
-        return "Employee{" +
-                "id='" + id + '\'' +
-                ", person=" + person +
-                '}';
-    }
 }

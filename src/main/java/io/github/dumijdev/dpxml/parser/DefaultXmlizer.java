@@ -82,7 +82,7 @@ public class DefaultXmlizer implements Xmlizer {
 
         builder.append(">");
 
-        Arrays.stream(clazz.getDeclaredFields()).parallel().forEach(field -> {
+        Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
             try {
                 if (field.isAnnotationPresent(IgnoreElement.class)) {
                     return;

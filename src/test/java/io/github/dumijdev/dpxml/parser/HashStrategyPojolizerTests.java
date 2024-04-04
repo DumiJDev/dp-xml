@@ -1,5 +1,6 @@
 package io.github.dumijdev.dpxml.parser;
 
+import io.github.dumijdev.dpxml.enums.HashStrategyType;
 import io.github.dumijdev.dpxml.model.*;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;

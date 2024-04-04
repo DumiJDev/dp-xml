@@ -1,5 +1,6 @@
 package io.github.dumijdev.dpxml.parser;
 
+import io.github.dumijdev.dpxml.enums.HashStrategyType;
 import io.github.dumijdev.dpxml.model.Pojolizable;
 import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 import org.w3c.dom.Element;
@@ -26,6 +27,7 @@ public class HashStrategyPojolizer implements Pojolizer {
     private final DocumentBuilder documentBuilder;
     private final DateTimeFormatter dateFormatter;
     private final DateTimeFormatter dateTimeFormatter;
+    private HashStrategyType type;
 
     public HashStrategyPojolizer() throws Exception {
         this.documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -33,6 +35,12 @@ public class HashStrategyPojolizer implements Pojolizer {
         this.dateTimeFormatter = new DateTimeFormatterBuilder()
                 .appendPattern("yyyy-MM-dd[ HH[:mm[:ss[.S][.SS][.SSS]]]]")
                 .toFormatter();
+        this.type = HashStrategyType.SEQUENTIAL;
+    }
+
+    public HashStrategyPojolizer(HashStrategyType type) throws Exception {
+        this();
+        this.type = type;
     }
 
     @Override
@@ -42,14 +50,19 @@ public class HashStrategyPojolizer implements Pojolizer {
         }
         var instance = clazz.getDeclaredConstructor().newInstance();
 
-        var simpleNode = new ConcurrentHashMap<String, Node>();
-        var repeatedNode = new ConcurrentHashMap<String, CopyOnWriteArrayList<Node>>();
+        var simpleNode = type == HashStrategyType.PARALLEL ? new ConcurrentHashMap<String, Node>() : new HashMap<String, Node>();
+        var repeatedNode = type == HashStrategyType.PARALLEL ? new ConcurrentHashMap<String, List<Node>>() : new HashMap<String, List<Node>>();
 
         var element = documentBuilder.parse(new InputSource(new StringReader(xml))).getDocumentElement();
 
         preProcessXml(element, simpleNode, repeatedNode);
 
-        Arrays.stream(clazz.getDeclaredFields()).parallel().forEach(field -> {
+        var stream = Arrays.stream(clazz.getDeclaredFields());
+
+        if (type == HashStrategyType.PARALLEL)
+            stream = stream.parallel();
+
+        stream.forEachOrdered(field -> {
             try {
                 if (field.isAnnotationPresent(IgnoreElement.class))
                     return;
@@ -149,9 +162,15 @@ public class HashStrategyPojolizer implements Pojolizer {
         }
     }
 
-    private void preProcessXml(Element element, Map<String, Node> simpleNode, Map<String, CopyOnWriteArrayList<Node>> repeatedNode) {
+    private void preProcessXml(Element element, Map<String, Node> simpleNode, Map<String, List<Node>> repeatedNode) {
         var children = element.getChildNodes();
-        IntStream.range(0, children.getLength()).parallel().forEachOrdered(i -> {
+
+        IntStream stream = IntStream.range(0, children.getLength());
+
+        if (type == HashStrategyType.PARALLEL)
+            stream = stream.parallel();
+
+        stream.forEachOrdered(i -> {
             var item = children.item(i);
             if (item.getNodeType() == Node.ELEMENT_NODE) {
                 var name = simpleNodeName(item.getNodeName());

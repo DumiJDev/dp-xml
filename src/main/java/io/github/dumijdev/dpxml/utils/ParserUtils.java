@@ -53,7 +53,11 @@ public class ParserUtils {
 
         transformer.transform(domSource, result);
 
-        return writer.toString();
+        var xml = writer.toString();
+
+        System.out.println("XML: " + xml);
+
+        return xml;
     }
 
     public static Node findNode(Element parent, String name) {

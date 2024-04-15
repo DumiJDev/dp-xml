@@ -1,6 +1,7 @@
-package io.github.dumijdev.dpxml.parser;
+package io.github.dumijdev.dpxml.parser.impl;
 
 import io.github.dumijdev.dpxml.model.Pojolizable;
+import io.github.dumijdev.dpxml.parser.Pojolizer;
 import io.github.dumijdev.dpxml.stereotype.Element;
 import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 import org.w3c.dom.Node;
@@ -25,7 +26,11 @@ public class DefaultPojolizer implements Pojolizer {
     private final DateTimeFormatter dateFormatter;
     private final DateTimeFormatter dateTimeFormatter;
 
-    public DefaultPojolizer() throws Exception {
+    public static DefaultPojolizer newInstance() throws Exception {
+        return new DefaultPojolizer();
+    }
+
+    private DefaultPojolizer() throws Exception {
         this.documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.dateTimeFormatter = new DateTimeFormatterBuilder()
@@ -34,7 +39,7 @@ public class DefaultPojolizer implements Pojolizer {
     }
 
     @Override
-    public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+    public synchronized  <T> T pojoify(String xml, Class<T> clazz) throws Exception {
         if (!clazz.isAnnotationPresent(Pojolizable.class)) {
             throw new Exception("Não é possível converter em POJO, classe: (" + clazz.getSimpleName() + ")");
         }
@@ -48,7 +53,7 @@ public class DefaultPojolizer implements Pojolizer {
 
             field.setAccessible(true);
 
-            String name = "";
+            String name = null;
 
             if (field.isAnnotationPresent(Element.class)) {
                 var metadata = field.getAnnotation(Element.class);
@@ -56,7 +61,7 @@ public class DefaultPojolizer implements Pojolizer {
                 name = metadata.name();
             }
 
-            name = name.isEmpty() ? field.getName() : name;
+            name = Objects.isNull(name) ? field.getName() : name;
             var children = findNodes(element, name);
 
             if (isPrimitive(field.getType())) {
@@ -100,7 +105,7 @@ public class DefaultPojolizer implements Pojolizer {
                         continue;
                     }
 
-                    var obj = pojoify(stringifyXml(node), field.getType());
+                    var obj =  pojoify(stringifyXml(node), field.getType());
 
                     field.set(instance, obj);
                 } else throw new Exception("");

@@ -3,6 +3,8 @@ package io.github.dumijdev.dpxml.parser;
 import io.github.dumijdev.dpxml.model.Company;
 import io.github.dumijdev.dpxml.model.Employee;
 import io.github.dumijdev.dpxml.model.Person;
+import io.github.dumijdev.dpxml.parser.impl.DefaultPojolizer;
+import io.github.dumijdev.dpxml.parser.impl.DefaultXmlizer;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +22,7 @@ public class DefaultXmlizerTests {
     @BeforeAll
     static void setup() throws Exception {
         xml = "<root><name>Dumildes Paulo</name><age>77</age></root>";
-        pojolizer = new DefaultPojolizer();
+        pojolizer = DefaultPojolizer.newInstance();
         xmlizer = new DefaultXmlizer().registerNamespace("ns3", "https://1234.tes").registerNamespace("ns4", "https://1234.tes");
         clazzXml = "<root><person><name>Dumildes Paulo</name><age>77</age></person><person><name>Thiago Santana</name><age>77</age></person></root>";
         employeeXml = "<employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee>";

@@ -1,7 +1,8 @@
-package io.github.dumijdev.dpxml.parser;
+package io.github.dumijdev.dpxml.parser.impl;
 
 import io.github.dumijdev.dpxml.enums.HashStrategyType;
 import io.github.dumijdev.dpxml.model.Pojolizable;
+import io.github.dumijdev.dpxml.parser.Pojolizer;
 import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,7 +30,15 @@ public class HashStrategyPojolizer implements Pojolizer {
     private final DateTimeFormatter dateTimeFormatter;
     private HashStrategyType type;
 
-    public HashStrategyPojolizer() throws Exception {
+    public static HashStrategyPojolizer newInstance() throws Exception {
+        return new HashStrategyPojolizer();
+    }
+
+    public static HashStrategyPojolizer newInstance(HashStrategyType type) throws Exception {
+        return new HashStrategyPojolizer(type);
+    }
+
+    private HashStrategyPojolizer() throws Exception {
         this.documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.dateTimeFormatter = new DateTimeFormatterBuilder()
@@ -38,13 +47,14 @@ public class HashStrategyPojolizer implements Pojolizer {
         this.type = HashStrategyType.SEQUENTIAL;
     }
 
-    public HashStrategyPojolizer(HashStrategyType type) throws Exception {
+    private HashStrategyPojolizer(HashStrategyType type) throws Exception {
         this();
         this.type = type;
     }
 
     @Override
-    public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+    public synchronized <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+        System.out.println(xml);
         if (!clazz.isAnnotationPresent(Pojolizable.class)) {
             throw new Exception("Não é possível converter em POJO, classe: (" + clazz.getSimpleName() + ")");
         }
@@ -63,6 +73,7 @@ public class HashStrategyPojolizer implements Pojolizer {
             stream = stream.parallel();
 
         stream.forEachOrdered(field -> {
+            System.out.println("Field: " + field);
             try {
                 if (field.isAnnotationPresent(IgnoreElement.class))
                     return;
@@ -79,6 +90,10 @@ public class HashStrategyPojolizer implements Pojolizer {
                 name = name.isEmpty() ? field.getName() : name;
 
                 var fieldType = field.getType();
+
+                if (!simpleNode.containsKey(name) && !repeatedNode.containsKey(name)) return;
+
+                System.out.println("Fieldname: " + name);
 
                 if (isPrimitive(fieldType)) {
                     if (!simpleNode.containsKey(name))
@@ -102,7 +117,7 @@ public class HashStrategyPojolizer implements Pojolizer {
                                 if (!actualTypeArgument.isAnnotationPresent(Pojolizable.class)) {
                                     throw new Exception(String.format("Campo %s não está marcado como pojolizable", name));
                                 }
-                                var obj = pojoify(stringifyXml(item), actualTypeArgument);
+                                var obj = type == HashStrategyType.PARALLEL ? newInstance(type).pojoify(stringifyXml(item), actualTypeArgument) : pojoify(stringifyXml(item), actualTypeArgument);
                                 values.add(obj);
                             }
                         }
@@ -112,7 +127,8 @@ public class HashStrategyPojolizer implements Pojolizer {
                     if (fieldType.isAnnotationPresent(Pojolizable.class)) {
                         var node = simpleNode.get(name);
                         if (node != null) {
-                            var obj = pojoify(stringifyXml(node), fieldType);
+                            System.out.println("Node: " + node.getNodeName());
+                            var obj = type == HashStrategyType.PARALLEL ? newInstance(type).pojoify(stringifyXml(node), fieldType) : pojoify(stringifyXml(node), fieldType);
                             field.set(instance, obj);
                         }
                     } else throw new Exception(String.format("Campo %s não está marcado como pojolizable", name));

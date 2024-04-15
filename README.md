@@ -33,8 +33,8 @@ Aqui está um exemplo de como você pode usar a biblioteca para converter **POJO
 
 import io.github.dumijdev.dpxml.model.Pojolizable;
 import io.github.dumijdev.dpxml.model.Xmlizable;
-import io.github.dumijdev.dpxml.parser.DefaultPojolizer;
-import io.github.dumijdev.dpxml.parser.DefaultXmlizer;
+import io.github.dumijdev.dpxml.parser.impl.DefaultPojolizer;
+import io.github.dumijdev.dpxml.parser.impl.DefaultXmlizer;
 import io.github.dumijdev.dpxml.stereotype.Element;
 
 @Pojolizable //Able a class be convert to pojo

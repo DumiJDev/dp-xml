@@ -1,6 +1,7 @@
-package io.github.dumijdev.dpxml.parser;
+package io.github.dumijdev.dpxml.parser.impl;
 
 import io.github.dumijdev.dpxml.model.Xmlizable;
+import io.github.dumijdev.dpxml.parser.Xmlizer;
 import io.github.dumijdev.dpxml.stereotype.*;
 
 import java.util.*;
@@ -157,7 +158,15 @@ public class DefaultXmlizer implements Xmlizer {
     }
 
     public DefaultXmlizer registerNamespace(String name, String value) {
+        if ((Objects.isNull(name) || name.isEmpty()) || (Objects.isNull(value) || value.isEmpty())) return this;
+
         namespaces.put(name, value);
+
+        return this;
+    }
+
+    public DefaultXmlizer registerNamespaces(Map<String, String> namespaces) {
+        namespaces.forEach(this::registerNamespace);
 
         return this;
     }

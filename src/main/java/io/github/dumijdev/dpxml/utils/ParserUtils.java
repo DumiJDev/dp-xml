@@ -53,11 +53,7 @@ public class ParserUtils {
 
         transformer.transform(domSource, result);
 
-        var xml = writer.toString();
-
-        System.out.println("XML: " + xml);
-
-        return xml;
+        return writer.toString();
     }
 
     public static Node findNode(Element parent, String name) {
@@ -90,10 +86,6 @@ public class ParserUtils {
 
     public static boolean isCollection(Class<?> clazz) {
         return Collection.class.isAssignableFrom(clazz);
-    }
-
-    public static boolean isList(Class<?> clazz) {
-        return List.class.isAssignableFrom(clazz);
     }
 
     public static boolean isSet(Class<?> clazz) {

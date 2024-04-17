@@ -54,7 +54,6 @@ public class HashStrategyPojolizer implements Pojolizer {
 
     @Override
     public synchronized <T> T pojoify(String xml, Class<T> clazz) throws Exception {
-        System.out.println(xml);
         if (!clazz.isAnnotationPresent(Pojolizable.class)) {
             throw new Exception("Não é possível converter em POJO, classe: (" + clazz.getSimpleName() + ")");
         }
@@ -73,7 +72,6 @@ public class HashStrategyPojolizer implements Pojolizer {
             stream = stream.parallel();
 
         stream.forEachOrdered(field -> {
-            System.out.println("Field: " + field);
             try {
                 if (field.isAnnotationPresent(IgnoreElement.class))
                     return;
@@ -93,7 +91,6 @@ public class HashStrategyPojolizer implements Pojolizer {
 
                 if (!simpleNode.containsKey(name) && !repeatedNode.containsKey(name)) return;
 
-                System.out.println("Fieldname: " + name);
 
                 if (isPrimitive(fieldType)) {
                     if (!simpleNode.containsKey(name))
@@ -117,7 +114,7 @@ public class HashStrategyPojolizer implements Pojolizer {
                                 if (!actualTypeArgument.isAnnotationPresent(Pojolizable.class)) {
                                     throw new Exception(String.format("Campo %s não está marcado como pojolizable", name));
                                 }
-                                var obj = type == HashStrategyType.PARALLEL ? newInstance(type).pojoify(stringifyXml(item), actualTypeArgument) : pojoify(stringifyXml(item), actualTypeArgument);
+                                var obj = pojoify(stringifyXml(item), actualTypeArgument);
                                 values.add(obj);
                             }
                         }
@@ -127,8 +124,7 @@ public class HashStrategyPojolizer implements Pojolizer {
                     if (fieldType.isAnnotationPresent(Pojolizable.class)) {
                         var node = simpleNode.get(name);
                         if (node != null) {
-                            System.out.println("Node: " + node.getNodeName());
-                            var obj = type == HashStrategyType.PARALLEL ? newInstance(type).pojoify(stringifyXml(node), fieldType) : pojoify(stringifyXml(node), fieldType);
+                            var obj = pojoify(stringifyXml(node), fieldType);
                             field.set(instance, obj);
                         }
                     } else throw new Exception(String.format("Campo %s não está marcado como pojolizable", name));
@@ -195,7 +191,6 @@ public class HashStrategyPojolizer implements Pojolizer {
                 } else if (simpleNode.containsKey(name)) {
                     var items = new CopyOnWriteArrayList<Node>();
                     var node = simpleNode.remove(name);
-                    System.out.println(node);
                     items.add(node);
                     items.add(item);
                     repeatedNode.put(name, items);

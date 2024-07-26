@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface FlexElement {
-  String path() default "";
-  String dst() default "";
+  String src();
+  String dst();
 }

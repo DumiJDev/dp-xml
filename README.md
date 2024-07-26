@@ -1,4 +1,4 @@
-# DP-XML
+# DP-XML 
 
 ## Descrição
 
@@ -21,7 +21,7 @@ Para instalar a biblioteca em seu projeto Maven, adicione a seguinte dependênci
 <dependency>
     <groupId>io.github.dumijdev</groupId>
     <artifactId>dp-xml</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -31,10 +31,12 @@ Aqui está um exemplo de como você pode usar a biblioteca para converter **POJO
 
 ```java
 
+import io.github.dumijdev.dpxml.parser.impl.pojo.BasicPojolizer;
+import io.github.dumijdev.dpxml.parser.impl.pojo.FlexBasicPojolizer;
+import io.github.dumijdev.dpxml.stereotype.FlexElement;
 import io.github.dumijdev.dpxml.stereotype.Pojolizable;
 import io.github.dumijdev.dpxml.stereotype.Xmlizable;
-import io.github.dumijdev.dpxml.parser.impl.DefaultPojolizer;
-import io.github.dumijdev.dpxml.parser.impl.DefaultXmlizer;
+import io.github.dumijdev.dpxml.parser.impl.xml.DefaultXmlizer;
 import io.github.dumijdev.dpxml.stereotype.Element;
 
 @Pojolizable //Able a class be convert to pojo
@@ -56,11 +58,32 @@ class Student {
   }
 }
 
+class SimpleStudent {
+  @FlexElement(src = "data.students.student.name", dst = "name")
+  private String name;
+
+  public SimpleStudent() {
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return name;
+  }
+}
+
   Xmlizer xmlizer = new DefaultXmlizer();
   var xmlStudent = xmlizer.xmlify(new Student());
 
-  Pojolizer pojolizer = new DefaultPojolizer();
+  Pojolizer pojolizer = new BasicPojolizer();
   var student = pojolizer.pojoify(xmlStudent, Student.class);
+
+  var xmlSimple = "<root><data><students><student><name>Dumildes Paulo</name></student></students></data></root>";
+
+  var flexPojolizer = new FlexBasicPojolizer();
+  var simpleStudent = flexPojolizer.pojoify(xmlSimple, SimpleStudent.class);
 
 ```
 

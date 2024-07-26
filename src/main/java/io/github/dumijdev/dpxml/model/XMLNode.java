@@ -95,7 +95,7 @@ public class XMLNode implements Node {
 
   @Override
   public List<Node> children(String name) {
-    return children.get(name);
+    return children.getOrDefault(name, new ArrayList<>());
   }
 
   public void setContent(String content) {

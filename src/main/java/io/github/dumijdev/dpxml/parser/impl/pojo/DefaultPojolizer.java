@@ -1,4 +1,4 @@
-package io.github.dumijdev.dpxml.parser.impl;
+package io.github.dumijdev.dpxml.parser.impl.pojo;
 
 import io.github.dumijdev.dpxml.parser.Pojolizer;
 import io.github.dumijdev.dpxml.stereotype.Element;
@@ -8,8 +8,6 @@ import io.github.dumijdev.dpxml.utils.XMLreaderContext;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -38,7 +36,7 @@ public class DefaultPojolizer implements Pojolizer {
   }
 
   @Override
-  public synchronized <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+  public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
     if (!clazz.isAnnotationPresent(Pojolizable.class)) {
       throw new Exception("Não é possível converter em POJO, classe: (" + clazz.getSimpleName() + ")");
     }

@@ -3,13 +3,10 @@ package io.github.dumijdev.dpxml.parser;
 import io.github.dumijdev.dpxml.model.Company;
 import io.github.dumijdev.dpxml.model.Employee;
 import io.github.dumijdev.dpxml.model.Person;
-import io.github.dumijdev.dpxml.parser.impl.DefaultPojolizer;
-import io.github.dumijdev.dpxml.parser.impl.DefaultXmlizer;
+import io.github.dumijdev.dpxml.parser.impl.pojo.DefaultPojolizer;
+import io.github.dumijdev.dpxml.parser.impl.xml.DefaultXmlizer;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 public class DefaultXmlizerTests {
   private static String xml;
@@ -30,7 +27,7 @@ public class DefaultXmlizerTests {
   }
 
   @DisplayName("Should xmlify")
-  @Test
+  @RepeatedTest(200)
   @SneakyThrows
   void shouldXmlifyPOJO() {
     var pojo = pojolizer.pojoify(xml, Person.class);
@@ -43,7 +40,7 @@ public class DefaultXmlizerTests {
   }
 
   @DisplayName("Should xmlify a complex object")
-  @Test
+  @RepeatedTest(200)
   @SneakyThrows
   void shouldXmlifyAComplexObject() {
     var pojo = pojolizer.pojoify(companyXml, Company.class);
@@ -57,12 +54,12 @@ public class DefaultXmlizerTests {
   }
 
   @DisplayName("Should throws NullPointerException")
-  @Test
+  @RepeatedTest(200)
   void shouldThrowsNullPointerException() {
     Assertions.assertThrows(NullPointerException.class, () -> xmlizer.xmlify(null));
   }
 
-  @Test
+  @RepeatedTest(200)
   @SneakyThrows
   void shouldParseComplexObjectWithAnotherObject() {
     var pojo = pojolizer.pojoify(employeeXml, Employee.class);

@@ -1,4 +1,4 @@
-package io.github.dumijdev.dpxml.parser.impl;
+package io.github.dumijdev.dpxml.parser.impl.xml;
 
 import io.github.dumijdev.dpxml.exception.UnXmlizableException;
 import io.github.dumijdev.dpxml.model.Node;

@@ -1,15 +1,14 @@
-package io.github.dumijdev.dpxml.parser.impl;
+package io.github.dumijdev.dpxml.parser.impl.pojo;
 
 import io.github.dumijdev.dpxml.enums.HashStrategyType;
 import io.github.dumijdev.dpxml.parser.Pojolizer;
 import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 import io.github.dumijdev.dpxml.stereotype.Pojolizable;
+import io.github.dumijdev.dpxml.utils.XMLreaderContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.lang.reflect.ParameterizedType;
 import java.time.LocalDate;
@@ -25,13 +24,11 @@ import static io.github.dumijdev.dpxml.utils.ParserUtils.*;
 
 public class HashStrategyPojolizer implements Pojolizer {
 
-  private final DocumentBuilder documentBuilder;
   private final DateTimeFormatter dateFormatter;
   private final DateTimeFormatter dateTimeFormatter;
   private HashStrategyType type;
 
   private HashStrategyPojolizer() throws Exception {
-    this.documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
     this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     this.dateTimeFormatter = new DateTimeFormatterBuilder()
         .appendPattern("yyyy-MM-dd[ HH[:mm[:ss[.S][.SS][.SSS]]]]")
@@ -53,7 +50,7 @@ public class HashStrategyPojolizer implements Pojolizer {
   }
 
   @Override
-  public synchronized <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+  public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
     if (!clazz.isAnnotationPresent(Pojolizable.class)) {
       throw new Exception("Não é possível converter em POJO, classe: (" + clazz.getSimpleName() + ")");
     }
@@ -62,7 +59,7 @@ public class HashStrategyPojolizer implements Pojolizer {
     var simpleNode = type == HashStrategyType.PARALLEL ? new ConcurrentHashMap<String, Node>() : new HashMap<String, Node>();
     var repeatedNode = type == HashStrategyType.PARALLEL ? new ConcurrentHashMap<String, List<Node>>() : new HashMap<String, List<Node>>();
 
-    var element = documentBuilder.parse(new InputSource(new StringReader(xml))).getDocumentElement();
+    var element = XMLreaderContext.readerContext.get().parse(new InputSource(new StringReader(xml))).getDocumentElement();
 
     preProcessXml(element, simpleNode, repeatedNode);
 

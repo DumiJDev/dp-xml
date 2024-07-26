@@ -1,9 +1,10 @@
-package io.github.dumijdev.dpxml.parser.impl;
+package io.github.dumijdev.dpxml.parser.impl.pojo;
 
 import io.github.dumijdev.dpxml.exception.UnPojolizableException;
 import io.github.dumijdev.dpxml.model.Node;
 import io.github.dumijdev.dpxml.parser.Nodilizer;
 import io.github.dumijdev.dpxml.parser.Pojolizer;
+import io.github.dumijdev.dpxml.parser.impl.DefaultNodilizer;
 import io.github.dumijdev.dpxml.stereotype.Element;
 import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 import io.github.dumijdev.dpxml.stereotype.Pojolizable;

@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RootElement {
-    String name() default "";
-    String namespace() default "";
+  String name() default "";
+
+  String namespace() default "";
 }

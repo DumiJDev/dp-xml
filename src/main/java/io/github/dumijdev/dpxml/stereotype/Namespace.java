@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Namespace {
-    String name() default "";
-    String value();
+  String name() default "";
+
+  String value();
 }

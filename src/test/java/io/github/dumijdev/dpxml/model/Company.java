@@ -16,9 +16,9 @@ import java.util.Set;
 @EqualsAndHashCode
 @ToString
 public class Company {
-    private String id;
-    @Element(namespace = "tst")
-    private Employee employee;
-    @Element(name = "name", namespace = "tst")
-    private Set<String> names;
+  private String id;
+  @Element(namespace = "tst")
+  private Employee employee;
+  @Element(name = "name", namespace = "tst")
+  private Set<String> names;
 }

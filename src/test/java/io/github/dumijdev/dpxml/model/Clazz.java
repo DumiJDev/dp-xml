@@ -1,6 +1,7 @@
 package io.github.dumijdev.dpxml.model;
 
 import io.github.dumijdev.dpxml.stereotype.Element;
+import io.github.dumijdev.dpxml.stereotype.Pojolizable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,6 @@ import java.util.List;
 @Pojolizable
 @ToString
 public class Clazz {
-    @Element(namespace = "pay1")
-    private List<Person> person;
+  @Element(namespace = "pay1")
+  private List<Person> person;
 }

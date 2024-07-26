@@ -31,8 +31,8 @@ Aqui está um exemplo de como você pode usar a biblioteca para converter **POJO
 
 ```java
 
-import io.github.dumijdev.dpxml.model.Pojolizable;
-import io.github.dumijdev.dpxml.model.Xmlizable;
+import io.github.dumijdev.dpxml.stereotype.Pojolizable;
+import io.github.dumijdev.dpxml.stereotype.Xmlizable;
 import io.github.dumijdev.dpxml.parser.impl.DefaultPojolizer;
 import io.github.dumijdev.dpxml.parser.impl.DefaultXmlizer;
 import io.github.dumijdev.dpxml.stereotype.Element;
@@ -40,27 +40,27 @@ import io.github.dumijdev.dpxml.stereotype.Element;
 @Pojolizable //Able a class be convert to pojo
 @Xmlizable //Able a class be convert to xml
 class Student {
-    @Element(name = "name") //Optional annotation
-    private String name;
+  @Element(name = "name") //Optional annotation
+  private String name;
 
-    public Student() {
-        this.name = "Test";
-    }
+  public Student() {
+    this.name = "Test";
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 }
 
-    Xmlizer xmlizer = new DefaultXmlizer();
-    var xmlStudent = xmlizer.xmlify(new Student());
+  Xmlizer xmlizer = new DefaultXmlizer();
+  var xmlStudent = xmlizer.xmlify(new Student());
 
-    Pojolizer pojolizer = new DefaultPojolizer();
-    var student = pojolizer.pojoify(xmlStudent, Student.class);
+  Pojolizer pojolizer = new DefaultPojolizer();
+  var student = pojolizer.pojoify(xmlStudent, Student.class);
 
 ```
 

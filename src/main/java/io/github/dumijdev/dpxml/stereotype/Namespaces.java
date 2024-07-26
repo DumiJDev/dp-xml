@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Namespaces {
-    Namespace[] namespaces() default {};
+  Namespace[] namespaces() default {};
 }

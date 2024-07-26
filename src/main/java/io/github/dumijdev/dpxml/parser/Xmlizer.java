@@ -1,13 +1,15 @@
 package io.github.dumijdev.dpxml.parser;
 
+import io.github.dumijdev.dpxml.model.Node;
+import io.github.dumijdev.dpxml.utils.XMLreaderContext;
 import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 public interface Xmlizer {
-    default Document convertToDoc(Object xml) throws Exception {
-        return DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder().parse(xmlify(xml));
-    }
+  default Document convertToDoc(Object xml) throws Exception {
+    return XMLreaderContext.readerContext.get().parse(xmlify(xml));
+  }
 
-    String xmlify(Object xml) throws Exception;
+  String xmlify(Object xml) throws Exception;
+
+  String xmlify(Node node);
 }

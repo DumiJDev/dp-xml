@@ -61,6 +61,11 @@ class Student {
     private String generateTitle() {
         return UUID.randomUUID().toString();
     }
+    
+    @DynamicAttributeGenerator(name = "generatedTitle", fields = {"name"})
+    private String generatorMethod() {
+        return "Title: %s" + name;
+    }
 }
 
 class SimpleStudent {

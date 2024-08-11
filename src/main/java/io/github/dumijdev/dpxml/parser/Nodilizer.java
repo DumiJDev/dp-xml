@@ -3,7 +3,8 @@ package io.github.dumijdev.dpxml.parser;
 import io.github.dumijdev.dpxml.model.Node;
 import io.github.dumijdev.dpxml.model.XMLAttribute;
 import io.github.dumijdev.dpxml.model.XMLNode;
-import io.github.dumijdev.dpxml.utils.XMLreaderContext;
+import io.github.dumijdev.dpxml.utils.XMLReaderContext;
+import io.github.dumijdev.dpxml.utils.XMLReaderContext.DocumentReader;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -39,12 +40,8 @@ public interface Nodilizer {
   }
 
   default Node nodify(String xml) {
-    try {
-      Element element = XMLreaderContext.readerContext.get().parse(new InputSource(new StringReader(xml))).getDocumentElement();
+      Element element = DocumentReader.read(xml).getDocumentElement();
 
       return fromElement(element);
-    } catch (SAXException | IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

@@ -1,22 +1,24 @@
 package io.github.dumijdev.dpxml.model;
 
-import io.github.dumijdev.dpxml.stereotype.Pojolizable;
-import io.github.dumijdev.dpxml.stereotype.Xmlizable;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import io.github.dumijdev.dpxml.stereotype.*;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
 @Pojolizable
 @Xmlizable
-@EqualsAndHashCode
-@ToString
+@StaticAttribute(name = "classType", value = "Class")
+@DynamicAttribute(name = "dynamicClass", method = "name")
 public class Person {
+  @StaticAttribute(name = "staticType", value = "String")
+  @DynamicAttribute(name = "dynamicType", method = "name")
   private String name;
   private int age;
 
   public Person() {
+  }
+
+  @DynamicAttributeGenerator(name = "generated", fields = {"age", "name"})
+  public String name() {
+    return name;
   }
 }

@@ -27,6 +27,10 @@ public interface Node {
 
   List<Node> children(String name);
 
+  String namespace();
+
+  String asXml();
+
   interface Attribute {
     String name();
 

@@ -4,6 +4,7 @@ import io.github.dumijdev.dpxml.exception.UnXmlizableException;
 import io.github.dumijdev.dpxml.model.Node;
 import io.github.dumijdev.dpxml.parser.Xmlizer;
 import io.github.dumijdev.dpxml.stereotype.*;
+import io.github.dumijdev.dpxml.utils.Attributes;
 
 import java.util.*;
 
@@ -12,168 +13,199 @@ import static io.github.dumijdev.dpxml.utils.ParserUtils.isPrimitive;
 import static java.lang.String.format;
 
 public class DefaultXmlizer implements Xmlizer {
-  private final Map<String, String> namespaces = new HashMap<>();
+    private final Map<String, String> namespaces = new HashMap<>();
 
-  @Override
-  public String xmlify(Object obj) throws Exception {
-    return xmlify(obj, null, null);
-  }
-
-  @Override
-  public String xmlify(Node node) {
-    return null;
-  }
-
-  private String xmlify(Object obj, String name, String namespace) throws Exception {
-    var clazz = obj.getClass();
-
-    if (!clazz.isAnnotationPresent(Xmlizable.class)) {
-      throw new UnXmlizableException(obj.getClass().getSimpleName());
+    @Override
+    public String xmlify(Object obj) throws Exception {
+        return xmlify(obj, null, null);
     }
 
-    var builder = new StringBuilder();
-    String rootName = Objects.isNull(name) ? clazz.getSimpleName().toLowerCase() : name;
-
-    if (clazz.isAnnotationPresent(RootElement.class) && Objects.isNull(namespace)) {
-      var metadata = clazz.getDeclaredAnnotation(RootElement.class);
-      rootName = metadata.name().isEmpty() ? rootName : metadata.name();
-
-      rootName = metadata.namespace().isEmpty() ? rootName : format("%s:%s", metadata.namespace(), rootName);
-
-    } else if (!Objects.isNull(namespace)) {
-      rootName = String.format("%s:%s", namespace, rootName);
+    @Override
+    public String xmlify(Node node) {
+        return null;
     }
 
-    builder.append("<").append(rootName);
+    private String xmlify(Object obj, String name, String namespace) throws Exception {
+        var clazz = obj.getClass();
 
-    if (clazz.isAnnotationPresent(Namespaces.class)) {
-      var namespaces = clazz.getDeclaredAnnotation(Namespaces.class);
-
-      for (var namespace1 : namespaces.namespaces()) {
-        if (namespace1.name().isEmpty() && namespace1.value().isEmpty()) {
-          continue;
+        if (!clazz.isAnnotationPresent(Xmlizable.class)) {
+            throw new UnXmlizableException(obj.getClass().getSimpleName());
         }
 
-        builder.append(format(" xmlns:%s=\"%s\"",
-                namespace1.name(),
-                namespace1.value()
-            )
-        );
-      }
-    } else if (clazz.isAnnotationPresent(DeclaredNamespaces.class)) {
-      var aliases = clazz.getDeclaredAnnotation(DeclaredNamespaces.class);
-      for (var alias : aliases.aliases()) {
-        if (!namespaces.containsKey(alias)) {
-          continue;
-        }
+        var builder = new StringBuilder();
+        var tempBuilder = new StringBuilder();
+        var rootName = getName(name, namespace, clazz);
+        var attributes = Attributes.getAttributes(clazz, obj);
 
-        builder.append(format(" xmlns:%s=\"%s\"",
-                alias,
-                namespaces.get(alias)
-            )
-        );
-      }
+        var rootNameTemp = processAttributes(rootName, clazz.getName(), attributes);
+
+        tempBuilder.append(rootNameTemp);
+
+        processNamespaces(clazz, tempBuilder);
+
+        openField(builder, tempBuilder.toString());
+
+        Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
+            try {
+                if (field.isAnnotationPresent(IgnoreElement.class)) {
+                    return;
+                }
+
+                field.setAccessible(true);
+
+                String name1 = field.getName();
+
+                if (field.isAnnotationPresent(Element.class)) {
+                    var metadata = field.getAnnotation(Element.class);
+
+                    name1 = metadata.name().isEmpty() ? name1 : metadata.name();
+
+                    name1 = !(name1.isEmpty() || metadata.namespace().isEmpty()) ? String.format("%s:%s", metadata.namespace(), name1) : name1;
+                }
+
+                if (Objects.isNull(field.get(obj))) {
+                    return;
+                }
+
+                if (isCollection(field.getType())) {
+                    var values = (Collection<Object>) field.get(obj);
+
+                    for (var el : values) {
+                        if (Objects.isNull(el)) {
+                            continue;
+                        }
+
+                        if (isPrimitive(el.getClass())) {
+                            var name1Temp = processAttributes(name1, field.getName(), attributes);
+                            openField(builder, name1Temp);
+                            builder.append(el);
+                            closeField(builder, name1);
+                        } else {
+                            String ns = null;
+
+                            if (field.isAnnotationPresent(Element.class)) {
+                                ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
+                            }
+
+                            builder.append(xmlify(el, name1, ns));
+                        }
+                    }
+                } else {
+                    if (isPrimitive(field.getType())) {
+                        var name1Temp = processAttributes(name1, field.getName(), attributes);
+                        openField(builder, name1Temp);
+                        builder.append(field.get(obj));
+                        closeField(builder, name1);
+                    } else {
+                        String ns = null;
+
+                        if (field.isAnnotationPresent(Element.class)) {
+                            ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
+                        }
+
+                        if (!Objects.isNull(ns) && name1.split(":").length > 1) {
+                            name1 = name1.split(":")[1];
+                        }
+
+                        builder.append(xmlify(field.get(obj), name1, ns));
+                    }
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        closeField(builder, rootName);
+
+        return builder.toString();
     }
 
-    if (clazz.isAnnotationPresent(Namespace.class)) {
-      var namespace1 = clazz.getDeclaredAnnotation(Namespace.class);
+    private String processAttributes(String fieldName, String key, Map<String, String> attributes) {
+        if (!attributes.containsKey(key)) {
+            return fieldName;
+        }
 
-      if (!namespace1.name().isEmpty() && !namespace1.value().isEmpty()) {
-        builder.append(format(" xmlns:%s=\"%s\"",
-                namespace1.name(),
-                namespace1.value()
-            )
-        );
-      }
+        return String.format("%s %s", fieldName, attributes.get(key));
     }
 
-    builder.append(">");
+    private void processNamespaces(Class<?> clazz, StringBuilder tempBuilder) {
+        if (clazz.isAnnotationPresent(Namespaces.class)) {
+            var namespaces = clazz.getDeclaredAnnotation(Namespaces.class);
 
-    Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
-      try {
-        if (field.isAnnotationPresent(IgnoreElement.class)) {
-          return;
+            for (var namespace1 : namespaces.namespaces()) {
+                if (namespace1.name().isEmpty() && namespace1.value().isEmpty()) {
+                    continue;
+                }
+
+                tempBuilder.append(format(" xmlns:%s=\"%s\"",
+                                namespace1.name(),
+                                namespace1.value()
+                        )
+                );
+            }
+        } else if (clazz.isAnnotationPresent(DeclaredNamespaces.class)) {
+            var aliases = clazz.getDeclaredAnnotation(DeclaredNamespaces.class);
+            for (var alias : aliases.aliases()) {
+                if (!namespaces.containsKey(alias)) {
+                    continue;
+                }
+
+                tempBuilder.append(format(" xmlns:%s=\"%s\"",
+                                alias,
+                                namespaces.get(alias)
+                        )
+                );
+            }
         }
 
-        field.setAccessible(true);
+        if (clazz.isAnnotationPresent(Namespace.class)) {
+            var namespace1 = clazz.getDeclaredAnnotation(Namespace.class);
 
-        String name1 = field.getName();
-
-        if (field.isAnnotationPresent(Element.class)) {
-          var metadata = field.getAnnotation(Element.class);
-
-          name1 = metadata.name().isEmpty() ? name1 : metadata.name();
-
-          name1 = !(name1.isEmpty() || metadata.namespace().isEmpty()) ? String.format("%s:%s", metadata.namespace(), name1) : name1;
+            if (!namespace1.name().isEmpty() && !namespace1.value().isEmpty()) {
+                tempBuilder.append(format(" xmlns:%s=\"%s\"",
+                                namespace1.name(),
+                                namespace1.value()
+                        )
+                );
+            }
         }
 
-        if (Objects.isNull(field.get(obj))) {
-          return;
+    }
+
+    private void openField(StringBuilder builder, String name) {
+        builder.append("<").append(name).append(">");
+    }
+
+    private void closeField(StringBuilder builder, String name) {
+        builder.append("</").append(name).append(">");
+    }
+
+    private String getName(String name, String namespace, Class<?> clazz) {
+        String rootName = Objects.isNull(name) ? clazz.getSimpleName().toLowerCase() : name;
+
+        if (clazz.isAnnotationPresent(RootElement.class) && Objects.isNull(namespace)) {
+            var metadata = clazz.getDeclaredAnnotation(RootElement.class);
+            rootName = metadata.name().isEmpty() ? rootName : metadata.name();
+
+            rootName = metadata.namespace().isEmpty() ? rootName : format("%s:%s", metadata.namespace(), rootName);
+
+        } else if (!Objects.isNull(namespace)) {
+            rootName = String.format("%s:%s", namespace, rootName);
         }
+        return rootName;
+    }
 
-        if (isCollection(field.getType())) {
-          var values = (Collection<Object>) field.get(obj);
+    public DefaultXmlizer registerNamespace(String name, String value) {
+        if ((Objects.isNull(name) || name.isEmpty()) || (Objects.isNull(value) || value.isEmpty())) return this;
 
-          for (var el : values) {
-            if (Objects.isNull(el)) {
-              continue;
-            }
+        namespaces.put(name, value);
 
-            if (isPrimitive(el.getClass())) {
-              builder.append("<").append(name1).append(">")
-                  .append(el)
-                  .append("</").append(name1).append(">");
-            } else {
-              String ns = null;
+        return this;
+    }
 
-              if (field.isAnnotationPresent(Element.class)) {
-                ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
-              }
+    public DefaultXmlizer registerNamespaces(Map<String, String> namespaces) {
+        namespaces.forEach(this::registerNamespace);
 
-              builder.append(xmlify(el, name1, ns));
-            }
-          }
-        } else {
-          if (isPrimitive(field.getType())) {
-            builder.append("<").append(name1).append(">")
-                .append(field.get(obj))
-                .append("</").append(name1).append(">");
-          } else {
-            String ns = null;
-
-            if (field.isAnnotationPresent(Element.class)) {
-              ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
-            }
-
-            if (!Objects.isNull(ns) && name1.split(":").length > 1) {
-              name1 = name1.split(":")[1];
-            }
-
-            builder.append(xmlify(field.get(obj), name1, ns));
-          }
-        }
-      } catch (Exception ex) {
-        throw new RuntimeException(ex);
-      }
-    });
-
-    return builder.append("</")
-        .append(rootName)
-        .append(">")
-        .toString();
-  }
-
-  public DefaultXmlizer registerNamespace(String name, String value) {
-    if ((Objects.isNull(name) || name.isEmpty()) || (Objects.isNull(value) || value.isEmpty())) return this;
-
-    namespaces.put(name, value);
-
-    return this;
-  }
-
-  public DefaultXmlizer registerNamespaces(Map<String, String> namespaces) {
-    namespaces.forEach(this::registerNamespace);
-
-    return this;
-  }
+        return this;
+    }
 }

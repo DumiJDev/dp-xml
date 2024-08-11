@@ -8,6 +8,7 @@ public class XMLNode implements Node {
   private String name;
   private Node parent;
   private String content;
+  private String namespace;
 
   public XMLNode() {
 
@@ -19,6 +20,11 @@ public class XMLNode implements Node {
 
   public XMLNode(String name) {
     this.name = name;
+  }
+
+  public XMLNode(String name, String namespace) {
+    this.name = name;
+    this.namespace = namespace;
   }
 
   @Override
@@ -96,6 +102,44 @@ public class XMLNode implements Node {
   @Override
   public List<Node> children(String name) {
     return children.getOrDefault(name, new ArrayList<>());
+  }
+
+  @Override
+  public String namespace() {
+    return namespace;
+  }
+
+  @Override
+  public String asXml() {
+    var builder = new StringBuilder();
+
+    builder.append('<');
+    if (Objects.nonNull(namespace()) && !namespace().isEmpty()) {
+      builder.append(namespace()).append(':');
+    }
+
+    builder.append(name());
+
+    for (var attribute : attributes()) {
+      builder.append(' ').append(attribute.name()).append('=')
+              .append("\"").append(attribute.value()).append("\"");
+    }
+
+    builder.append('>');
+
+    for (var child : children()) {
+      builder.append(child.asXml());
+    }
+
+    builder.append('<');
+    if (Objects.nonNull(namespace()) && !namespace().isEmpty()) {
+      builder.append(namespace()).append(':');
+    }
+
+    builder.append(name());
+    builder.append('>');
+
+    return builder.toString();
   }
 
   public void setContent(String content) {

@@ -6,8 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface FlexElement {
-  String src() default "";
-  String dst() default "";
+@Target({ElementType.TYPE, ElementType.FIELD})
+public @interface DynamicAttributes {
+    DynamicAttribute[] attributes() default {};
 }

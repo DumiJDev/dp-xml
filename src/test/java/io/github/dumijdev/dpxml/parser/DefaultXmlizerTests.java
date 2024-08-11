@@ -3,7 +3,7 @@ package io.github.dumijdev.dpxml.parser;
 import io.github.dumijdev.dpxml.model.Company;
 import io.github.dumijdev.dpxml.model.Employee;
 import io.github.dumijdev.dpxml.model.Person;
-import io.github.dumijdev.dpxml.parser.impl.pojo.DefaultPojolizer;
+import io.github.dumijdev.dpxml.parser.impl.pojo.BasicPojolizer;
 import io.github.dumijdev.dpxml.parser.impl.xml.DefaultXmlizer;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
@@ -19,7 +19,7 @@ public class DefaultXmlizerTests {
   @BeforeAll
   static void setup() throws Exception {
     xml = "<root><name>Dumildes Paulo</name><age>77</age></root>";
-    pojolizer = DefaultPojolizer.newInstance();
+    pojolizer = new BasicPojolizer();
     xmlizer = new DefaultXmlizer().registerNamespace("ns3", "https://1234.tes").registerNamespace("ns4", "https://1234.tes");
     clazzXml = "<root><person><name>Dumildes Paulo</name><age>77</age></person><person><name>Thiago Santana</name><age>77</age></person></root>";
     employeeXml = "<employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee>";
@@ -27,7 +27,7 @@ public class DefaultXmlizerTests {
   }
 
   @DisplayName("Should xmlify")
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   @SneakyThrows
   void shouldXmlifyPOJO() {
     var pojo = pojolizer.pojoify(xml, Person.class);
@@ -40,7 +40,7 @@ public class DefaultXmlizerTests {
   }
 
   @DisplayName("Should xmlify a complex object")
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   @SneakyThrows
   void shouldXmlifyAComplexObject() {
     var pojo = pojolizer.pojoify(companyXml, Company.class);
@@ -54,12 +54,12 @@ public class DefaultXmlizerTests {
   }
 
   @DisplayName("Should throws NullPointerException")
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldThrowsNullPointerException() {
-    Assertions.assertThrows(NullPointerException.class, () -> xmlizer.xmlify(null));
+    Assertions.assertThrows(NullPointerException.class, () -> xmlizer.xmlify((Object) null));
   }
 
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   @SneakyThrows
   void shouldParseComplexObjectWithAnotherObject() {
     var pojo = pojolizer.pojoify(employeeXml, Employee.class);

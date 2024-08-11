@@ -1,4 +1,4 @@
-package io.github.dumijdev.dpxml.parser.impl;
+package io.github.dumijdev.dpxml.parser.impl.node;
 
 import io.github.dumijdev.dpxml.parser.Nodilizer;
 

@@ -4,7 +4,7 @@ import io.github.dumijdev.dpxml.exception.UnPojolizableException;
 import io.github.dumijdev.dpxml.model.Node;
 import io.github.dumijdev.dpxml.parser.Nodilizer;
 import io.github.dumijdev.dpxml.parser.Pojolizer;
-import io.github.dumijdev.dpxml.parser.impl.DefaultNodilizer;
+import io.github.dumijdev.dpxml.parser.impl.node.DefaultNodilizer;
 import io.github.dumijdev.dpxml.stereotype.Element;
 import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 import io.github.dumijdev.dpxml.stereotype.Pojolizable;
@@ -23,7 +23,7 @@ import static io.github.dumijdev.dpxml.utils.ParserUtils.*;
 public class BasicPojolizer implements Pojolizer {
   private final DateTimeFormatter dateFormatter;
   private final DateTimeFormatter dateTimeFormatter;
-  private final ThreadLocal<Nodilizer> nodilizer = ThreadLocal.withInitial(() -> new DefaultNodilizer());
+  private final ThreadLocal<Nodilizer> nodilizer = ThreadLocal.withInitial(DefaultNodilizer::new);
 
   public BasicPojolizer() {
     this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -33,14 +33,18 @@ public class BasicPojolizer implements Pojolizer {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+    if (String.class.equals(clazz)) {
+
+      return (T) xml;
+    }
+
     if (!clazz.isAnnotationPresent(Pojolizable.class)) {
       throw new UnPojolizableException(clazz.getSimpleName());
     }
 
     var node = nodilizer.get().nodify(xml);
-
-    System.out.println(node + "\n\n");
 
     return pojoify(node, clazz);
   }
@@ -100,7 +104,6 @@ public class BasicPojolizer implements Pojolizer {
         field.set(instance, values);
       } else {
         if (field.getType().isAnnotationPresent(Pojolizable.class)) {
-          System.out.println("Object name: " + name);
           var localNode = node.child(name);
 
           if (localNode.isMissing()) {
@@ -108,8 +111,6 @@ public class BasicPojolizer implements Pojolizer {
           }
 
           var obj = pojoify(localNode, field.getType());
-
-          System.out.println("Field: " + field.getName() + ", obj :" + obj);
 
           field.set(instance, obj);
         } else throw new UnPojolizableException(field.getType().getSimpleName());

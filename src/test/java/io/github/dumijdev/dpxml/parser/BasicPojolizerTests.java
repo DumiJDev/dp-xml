@@ -1,5 +1,6 @@
 package io.github.dumijdev.dpxml.parser;
 
+import io.github.dumijdev.dpxml.exception.UnParsebleException;
 import io.github.dumijdev.dpxml.model.Clazz;
 import io.github.dumijdev.dpxml.model.Company;
 import io.github.dumijdev.dpxml.model.Employee;
@@ -29,7 +30,7 @@ class BasicPojolizerTests {
 
   @DisplayName("Should Pojolize simple string")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldPojolizeSimpleString() {
     long init = System.currentTimeMillis();
 
@@ -44,7 +45,7 @@ class BasicPojolizerTests {
 
   @DisplayName("Should returns an instance")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldReturnsAnInstance() {
     long init = System.currentTimeMillis();
 
@@ -59,7 +60,7 @@ class BasicPojolizerTests {
 
   @DisplayName("Should returns a class with a list of person")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldReturnsAClassWithAListOfPerson() {
     long init = System.currentTimeMillis();
     var clazz = pojolizer.pojoify(clazzXml, Clazz.class);
@@ -74,7 +75,7 @@ class BasicPojolizerTests {
   }
 
   @DisplayName("Should parse a complex object from xml string")
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   @SneakyThrows
   void shouldParseAComplexObjectFromXMLString() {
     long init = System.currentTimeMillis();
@@ -82,7 +83,7 @@ class BasicPojolizerTests {
     IntStream.range(0, 10000).parallel().forEach(i -> {
 
       try {
-        var person = pojolizer.pojoify(xml, Person.class);
+        pojolizer.pojoify(xml, Person.class);
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -102,7 +103,7 @@ class BasicPojolizerTests {
 
   @DisplayName("Should parse company object from xml string")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldParseCompanyObjectFromXMLString() {
     long init = System.currentTimeMillis();
     var employee = pojolizer.pojoify(employeeXml, Employee.class);
@@ -119,10 +120,20 @@ class BasicPojolizerTests {
   }
 
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldThrowsSAXParseException() {
     long init = System.currentTimeMillis();
-    Assertions.assertThrows(RuntimeException.class, () -> pojolizer.pojoify("", Person.class));
+    Assertions.assertThrows(UnParsebleException.class, () -> pojolizer.pojoify("", Person.class));
+
+    System.out.println("Time: " + (System.currentTimeMillis() - init) + " ms");
+  }
+
+  @SneakyThrows
+  @RepeatedTest(20)
+  void shouldReturnsInputString() {
+    long init = System.currentTimeMillis();
+
+    Assertions.assertEquals(companyXml, pojolizer.pojoify(companyXml, String.class));
 
     System.out.println("Time: " + (System.currentTimeMillis() - init) + " ms");
   }

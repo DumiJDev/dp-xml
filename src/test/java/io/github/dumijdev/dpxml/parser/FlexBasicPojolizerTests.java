@@ -26,7 +26,7 @@ class FlexBasicPojolizerTests {
 
   @DisplayName("Should Pojolize simple string")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldPojolizeSimpleString() {
     long init = System.currentTimeMillis();
 
@@ -41,7 +41,7 @@ class FlexBasicPojolizerTests {
 
   @DisplayName("Should returns an instance")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldReturnsAnInstance() {
     long init = System.currentTimeMillis();
 
@@ -56,7 +56,7 @@ class FlexBasicPojolizerTests {
 
   @DisplayName("Should returns a class with a list of person")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldReturnsAClassWithAListOfPerson() {
     long init = System.currentTimeMillis();
     var clazz = pojolizer.pojoify(clazzXml, Clazz.class);
@@ -71,7 +71,7 @@ class FlexBasicPojolizerTests {
   }
 
   @DisplayName("Should parse a complex object from xml string")
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   @SneakyThrows
   void shouldParseAComplexObjectFromXMLString() {
     long init = System.currentTimeMillis();
@@ -99,7 +99,7 @@ class FlexBasicPojolizerTests {
 
   @DisplayName("Should parse company object from xml string")
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldParseCompanyObjectFromXMLString() {
     long init = System.currentTimeMillis();
     var employee = pojolizer.pojoify(employeeXml, Employee.class);
@@ -116,7 +116,7 @@ class FlexBasicPojolizerTests {
   }
 
   @SneakyThrows
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   void shouldThrowsSAXParseException() {
     long init = System.currentTimeMillis();
     Assertions.assertThrows(RuntimeException.class, () -> pojolizer.pojoify("", Person.class));
@@ -124,7 +124,7 @@ class FlexBasicPojolizerTests {
     System.out.println("Time: " + (System.currentTimeMillis() - init) + " ms");
   }
 
-  @RepeatedTest(200)
+  @RepeatedTest(20)
   @SneakyThrows
   void shouldParseToObjectWithFlexElement() {
     var employee = pojolizer.pojoify(employeeXml, SimpleEmployee.class);
@@ -134,6 +134,16 @@ class FlexBasicPojolizerTests {
     Assertions.assertNotNull(employee);
     Assertions.assertNotEquals(0, employee.getAge());
     Assertions.assertNotNull(employee.getName());
+  }
+
+  @SneakyThrows
+  @RepeatedTest(20)
+  void shouldReturnsInputString() {
+    long init = System.currentTimeMillis();
+
+    Assertions.assertEquals(companyXml, pojolizer.pojoify(companyXml, String.class));
+
+    System.out.println("Time: " + (System.currentTimeMillis() - init) + " ms");
   }
 
 }

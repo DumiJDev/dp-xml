@@ -3,7 +3,7 @@ package io.github.dumijdev.dpxml.parser.impl.pojo;
 import io.github.dumijdev.dpxml.model.Node;
 import io.github.dumijdev.dpxml.parser.Nodilizer;
 import io.github.dumijdev.dpxml.parser.Pojolizer;
-import io.github.dumijdev.dpxml.parser.impl.DefaultNodilizer;
+import io.github.dumijdev.dpxml.parser.impl.node.DefaultNodilizer;
 import io.github.dumijdev.dpxml.stereotype.FlexElement;
 import io.github.dumijdev.dpxml.stereotype.IgnoreElement;
 
@@ -12,7 +12,12 @@ public class FlexBasicPojolizer implements Pojolizer {
   private final ThreadLocal<Nodilizer> nodilizer = ThreadLocal.withInitial(DefaultNodilizer::new);
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T pojoify(String xml, Class<T> clazz) throws Exception {
+    if (String.class.equals(clazz)) {
+
+      return (T) xml;
+    }
 
     var node = nodilizer.get().nodify(xml);
 
@@ -31,7 +36,7 @@ public class FlexBasicPojolizer implements Pojolizer {
         var metadata = field.getAnnotation(FlexElement.class);
 
         var paths = metadata.src().split("[.]");
-        Node temp = node;
+        Node temp = outNode;
         for (var path : paths) {
           temp = temp.child(path);
         }

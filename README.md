@@ -21,7 +21,7 @@ Para instalar a biblioteca em seu projeto Maven, adicione a seguinte dependênci
 <dependency>
     <groupId>io.github.dumijdev</groupId>
     <artifactId>dp-xml</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
 </dependency>
 ```
 

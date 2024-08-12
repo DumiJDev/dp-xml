@@ -1,6 +1,7 @@
 package io.github.dumijdev.dpxml.model;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class XMLNode implements Node {
   private final Map<String, Node.Attribute> attributes = new HashMap<>();
@@ -86,7 +87,7 @@ public class XMLNode implements Node {
 
   @Override
   public List<Attribute> attributes() {
-    return (List<Attribute>) attributes.values();
+    return new ArrayList<>(attributes.values());
   }
 
   @Override
@@ -127,11 +128,15 @@ public class XMLNode implements Node {
 
     builder.append('>');
 
+    if (Objects.nonNull(content()) && children.isEmpty()) {
+      builder.append(content);
+    }
+
     for (var child : children()) {
       builder.append(child.asXml());
     }
 
-    builder.append('<');
+    builder.append("</");
     if (Objects.nonNull(namespace()) && !namespace().isEmpty()) {
       builder.append(namespace()).append(':');
     }

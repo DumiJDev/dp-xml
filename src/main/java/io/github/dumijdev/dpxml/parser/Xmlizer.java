@@ -9,7 +9,7 @@ public interface Xmlizer {
     return XMLReaderContext.readerContext.get().parse(xmlify(xml));
   }
 
-  String xmlify(Object xml) throws Exception;
+  String xmlify(Object xml);
 
   String xmlify(Node node);
 }

@@ -5,7 +5,7 @@ import io.github.dumijdev.dpxml.parser.Xmlizer;
 
 public class BasicXmlizer implements Xmlizer {
     @Override
-    public String xmlify(Object xml) throws Exception {
+    public String xmlify(Object xml) {
         return "";
     }
 

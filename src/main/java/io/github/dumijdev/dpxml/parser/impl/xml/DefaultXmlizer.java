@@ -1,11 +1,13 @@
 package io.github.dumijdev.dpxml.parser.impl.xml;
 
+import io.github.dumijdev.dpxml.exception.InternalErrorException;
 import io.github.dumijdev.dpxml.exception.UnXmlizableException;
 import io.github.dumijdev.dpxml.model.Node;
 import io.github.dumijdev.dpxml.parser.Xmlizer;
 import io.github.dumijdev.dpxml.stereotype.*;
 import io.github.dumijdev.dpxml.utils.Attributes;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static io.github.dumijdev.dpxml.utils.ParserUtils.isCollection;
@@ -16,69 +18,86 @@ public class DefaultXmlizer implements Xmlizer {
     private final Map<String, String> namespaces = new HashMap<>();
 
     @Override
-    public String xmlify(Object obj) throws Exception {
+    public String xmlify(Object obj) {
         return xmlify(obj, null, null);
     }
 
     @Override
     public String xmlify(Node node) {
-        return null;
+        return node.asXml();
     }
 
-    private String xmlify(Object obj, String name, String namespace) throws Exception {
-        var clazz = obj.getClass();
+    private String xmlify(Object obj, String name, String namespace) {
+        try {
+            var clazz = obj.getClass();
 
-        if (!clazz.isAnnotationPresent(Xmlizable.class)) {
-            throw new UnXmlizableException(obj.getClass().getSimpleName());
-        }
+            if (!clazz.isAnnotationPresent(Xmlizable.class)) {
+                throw new UnXmlizableException(obj.getClass().getSimpleName());
+            }
 
-        var builder = new StringBuilder();
-        var tempBuilder = new StringBuilder();
-        var rootName = getName(name, namespace, clazz);
-        var attributes = Attributes.getAttributes(clazz, obj);
+            var builder = new StringBuilder();
+            var tempBuilder = new StringBuilder();
+            var rootName = getName(name, namespace, clazz);
+            var attributes = Attributes.getAttributes(clazz, obj);
 
-        var rootNameTemp = processAttributes(rootName, clazz.getName(), attributes);
+            var rootNameTemp = processAttributes(rootName, clazz.getName(), attributes);
 
-        tempBuilder.append(rootNameTemp);
+            tempBuilder.append(rootNameTemp);
 
-        processNamespaces(clazz, tempBuilder);
+            processNamespaces(clazz, tempBuilder);
 
-        openField(builder, tempBuilder.toString());
+            openField(builder, tempBuilder.toString());
 
-        Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
-            try {
-                if (field.isAnnotationPresent(IgnoreElement.class)) {
-                    return;
-                }
+            Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
+                try {
+                    if (field.isAnnotationPresent(IgnoreElement.class)) {
+                        return;
+                    }
 
-                field.setAccessible(true);
+                    field.setAccessible(true);
 
-                String name1 = field.getName();
+                    String name1 = field.getName();
 
-                if (field.isAnnotationPresent(Element.class)) {
-                    var metadata = field.getAnnotation(Element.class);
+                    if (field.isAnnotationPresent(Element.class)) {
+                        var metadata = field.getAnnotation(Element.class);
 
-                    name1 = metadata.name().isEmpty() ? name1 : metadata.name();
+                        name1 = metadata.name().isEmpty() ? name1 : metadata.name();
 
-                    name1 = !(name1.isEmpty() || metadata.namespace().isEmpty()) ? String.format("%s:%s", metadata.namespace(), name1) : name1;
-                }
+                        name1 = !(name1.isEmpty() || metadata.namespace().isEmpty()) ? String.format("%s:%s", metadata.namespace(), name1) : name1;
+                    }
 
-                if (Objects.isNull(field.get(obj))) {
-                    return;
-                }
+                    if (Objects.isNull(field.get(obj))) {
+                        return;
+                    }
 
-                if (isCollection(field.getType())) {
-                    var values = (Collection<Object>) field.get(obj);
+                    if (isCollection(field.getType())) {
+                        var values = (Collection<Object>) field.get(obj);
 
-                    for (var el : values) {
-                        if (Objects.isNull(el)) {
-                            continue;
+                        for (var el : values) {
+                            if (Objects.isNull(el)) {
+                                continue;
+                            }
+
+                            if (isPrimitive(el.getClass())) {
+                                var name1Temp = processAttributes(name1, field.getName(), attributes);
+                                openField(builder, name1Temp);
+                                builder.append(el);
+                                closeField(builder, name1);
+                            } else {
+                                String ns = null;
+
+                                if (field.isAnnotationPresent(Element.class)) {
+                                    ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
+                                }
+
+                                builder.append(xmlify(el, name1, ns));
+                            }
                         }
-
-                        if (isPrimitive(el.getClass())) {
+                    } else {
+                        if (isPrimitive(field.getType())) {
                             var name1Temp = processAttributes(name1, field.getName(), attributes);
                             openField(builder, name1Temp);
-                            builder.append(el);
+                            builder.append(field.get(obj));
                             closeField(builder, name1);
                         } else {
                             String ns = null;
@@ -87,37 +106,24 @@ public class DefaultXmlizer implements Xmlizer {
                                 ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
                             }
 
-                            builder.append(xmlify(el, name1, ns));
+                            if (!Objects.isNull(ns) && name1.split(":").length > 1) {
+                                name1 = name1.split(":")[1];
+                            }
+
+                            builder.append(xmlify(field.get(obj), name1, ns));
                         }
                     }
-                } else {
-                    if (isPrimitive(field.getType())) {
-                        var name1Temp = processAttributes(name1, field.getName(), attributes);
-                        openField(builder, name1Temp);
-                        builder.append(field.get(obj));
-                        closeField(builder, name1);
-                    } else {
-                        String ns = null;
-
-                        if (field.isAnnotationPresent(Element.class)) {
-                            ns = field.getAnnotation(Element.class).namespace().isEmpty() ? ns : field.getAnnotation(Element.class).namespace();
-                        }
-
-                        if (!Objects.isNull(ns) && name1.split(":").length > 1) {
-                            name1 = name1.split(":")[1];
-                        }
-
-                        builder.append(xmlify(field.get(obj), name1, ns));
-                    }
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+            });
 
-        closeField(builder, rootName);
+            closeField(builder, rootName);
 
-        return builder.toString();
+            return builder.toString();
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new InternalErrorException(e);
+        }
     }
 
     private String processAttributes(String fieldName, String key, Map<String, String> attributes) {

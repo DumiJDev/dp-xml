@@ -31,7 +31,6 @@ class BasicPojolizerTests {
     }
 
     @DisplayName("Should Pojolize simple string")
-    
     @RepeatedTest(20)
     void shouldPojolizeSimpleString() {
         long init = System.currentTimeMillis();
@@ -46,7 +45,6 @@ class BasicPojolizerTests {
     }
 
     @DisplayName("Should returns an instance")
-    
     @RepeatedTest(20)
     void shouldReturnsAnInstance() {
         long init = System.currentTimeMillis();
@@ -61,7 +59,6 @@ class BasicPojolizerTests {
     }
 
     @DisplayName("Should returns a class with a list of person")
-    
     @RepeatedTest(20)
     void shouldReturnsAClassWithAListOfPerson() {
         long init = System.currentTimeMillis();
@@ -78,7 +75,6 @@ class BasicPojolizerTests {
 
     @DisplayName("Should parse a complex object from xml string")
     @RepeatedTest(20)
-    
     void shouldParseAComplexObjectFromXMLString() {
         long init = System.currentTimeMillis();
         //var employee = pojolizer.pojoify(employeeXml, Employee.class);
@@ -104,7 +100,6 @@ class BasicPojolizerTests {
     }
 
     @DisplayName("Should parse company object from xml string")
-    
     @RepeatedTest(20)
     void shouldParseCompanyObjectFromXMLString() {
         long init = System.currentTimeMillis();

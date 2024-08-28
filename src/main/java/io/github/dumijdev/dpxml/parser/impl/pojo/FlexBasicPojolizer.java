@@ -44,8 +44,6 @@ public class FlexBasicPojolizer implements Pojolizer {
 
                 for (var i = 0; i < paths.length - 1; i++) {
                     temp = temp.child(paths[i]);
-
-                    System.out.println(temp.asXml());
                 }
 
                 var name = metadata.dst().isEmpty() ? field.getName() : metadata.dst();

@@ -99,7 +99,6 @@ public class BasicPojolizer implements Pojolizer {
                                 .map(node1 -> {
                                     try {
                                         if (isPrimitive(actualTypeArgument)) {
-                                            System.out.println("Content: " + node1.content());
                                             return convertValue(node1.content(), actualTypeArgument);
                                         } else {
 

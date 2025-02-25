@@ -3,7 +3,10 @@ package io.github.dumijdev.dpxml.utils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
@@ -92,5 +95,9 @@ public class ParserUtils {
 
   public static boolean isPrimitive(Class<?> clazz) {
     return CONSIDERED_PRIMITIVES.contains(clazz) || Temporal.class.isAssignableFrom(clazz);
+  }
+
+  public static boolean isMap(Class<?> clazz) {
+    return Map.class.isAssignableFrom(clazz);
   }
 }

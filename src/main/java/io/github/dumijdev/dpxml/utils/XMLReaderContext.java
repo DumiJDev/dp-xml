@@ -1,7 +1,6 @@
 package io.github.dumijdev.dpxml.utils;
 
 import io.github.dumijdev.dpxml.exception.UnParsebleException;
-import io.github.dumijdev.dpxml.exception.UnPojolizableException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -23,11 +22,13 @@ public class XMLReaderContext {
 
   public static class DocumentReader {
     public static Document read(String xml) {
-        try {
-            return readerContext.get().parse(new InputSource(new StringReader(xml)));
-        } catch (SAXException | IOException e) {
-            throw new UnParsebleException(e);
-        }
+      try {
+        var doc = readerContext.get().parse(new InputSource(new StringReader(xml)));
+        readerContext.remove();
+        return doc;
+      } catch (SAXException | IOException e) {
+        throw new UnParsebleException(e);
+      }
     }
   }
 }

@@ -30,7 +30,7 @@ public class XMLNode implements Node {
 
   @Override
   public String name() {
-    return name;
+    return name == null ? "" : name;
   }
 
   @Override
@@ -51,11 +51,7 @@ public class XMLNode implements Node {
   @Override
   public Node addChild(String name, Node node) {
 
-    var oldValues = children.getOrDefault(name, new LinkedList<>());
-
-    oldValues.add(node);
-
-    children.put(name, oldValues);
+    children.computeIfAbsent(name, k -> new ArrayList<>()).add(node);
 
     return this;
   }

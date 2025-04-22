@@ -2,6 +2,7 @@ package io.github.dumijdev.dpxml.model;
 
 import io.github.dumijdev.dpxml.stereotype.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -13,8 +14,8 @@ import java.util.Set;
 @Xmlizable
 public class Company {
     private String id;
-    @Element(namespace = "tst")
-    private Employee employee;
+    @Element(namespace = "ns4")
+    private Employees employees;
     @Element(name = "name", namespace = "tst")
     private Set<String> names;
 
@@ -22,7 +23,6 @@ public class Company {
     }
 
     public String getId() {
-
         return id;
     }
 
@@ -30,12 +30,12 @@ public class Company {
         this.id = id;
     }
 
-    public Employee getEmployee() {
-        return employee;
+    public Employees getEmployees() {
+        return employees;
     }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
+    public void setEmployees(Employees employees) {
+        this.employees = employees;
     }
 
     public Set<String> getNames() {
@@ -47,24 +47,28 @@ public class Company {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (!(object instanceof Company)) return false;
-        Company company = (Company) object;
-        return Objects.equals(id, company.id) && Objects.equals(employee, company.employee) && Objects.equals(names, company.names);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, employee, names);
-    }
-
-    @Override
     public String toString() {
         return "Company{" +
-                "id='" + id + '\'' +
-                ", employee=" + employee +
-                ", names=" + names +
+            "id='" + id + '\'' +
+            ", employees=" + employees +
+            ", names=" + names +
+            '}';
+    }
+
+    @Pojolizable
+    @Xmlizable
+    public static class Employees {
+        @Element(namespace = "tst")
+        private List<Employee> employee;
+
+        public Employees() {
+        }
+
+        @Override
+        public String toString() {
+            return "Employees{" +
+                "employee=" + employee +
                 '}';
+        }
     }
 }

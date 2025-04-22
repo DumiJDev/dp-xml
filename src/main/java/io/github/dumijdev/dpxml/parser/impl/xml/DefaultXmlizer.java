@@ -154,10 +154,6 @@ public class DefaultXmlizer implements Xmlizer {
       if (!metadata.name().isEmpty()) {
         fieldName = metadata.name();
       }
-
-      if (!fieldName.isEmpty() && !metadata.namespace().isEmpty()) {
-        fieldName = String.format(NAMESPACE_FORMAT, metadata.namespace(), fieldName);
-      }
     }
 
     return fieldName;

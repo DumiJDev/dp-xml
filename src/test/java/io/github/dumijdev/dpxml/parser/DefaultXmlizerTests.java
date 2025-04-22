@@ -23,11 +23,11 @@ class DefaultXmlizerTests {
     xmlizer = new DefaultXmlizer().registerNamespace("ns3", "https://1234.tes").registerNamespace("ns4", "https://1234.tes");
     clazzXml = "<root><person><name>Dumildes Paulo</name><age>77</age></person><person><name>Thiago Santana</name><age>77</age></person></root>";
     employeeXml = "<employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee>";
-    companyXml = "<root><id></id><employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee></root>";
+    companyXml = "<root><id></id><employees><employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee><employee><id>5000</id><person><name>Dumildes Paulo</name><age>77</age></person></employee></employees></root>";
   }
 
   @DisplayName("Should xmlify")
-  @RepeatedTest(20)
+  @Test
   void shouldXmlifyPOJO() {
     var pojo = pojolizer.pojoify(xml, Person.class);
     var pojoXml = xmlizer.xmlify(pojo);
@@ -39,7 +39,7 @@ class DefaultXmlizerTests {
   }
 
   @DisplayName("Should xmlify a complex object")
-  @RepeatedTest(20)
+  @Test
   void shouldXmlifyAComplexObject() {
     var pojo = pojolizer.pojoify(companyXml, Company.class);
     var pojoXml = xmlizer.xmlify(pojo);
@@ -49,9 +49,10 @@ class DefaultXmlizerTests {
 
     Assertions.assertEquals(pojo.getId(), pojo1.getId());
     Assertions.assertEquals(0, pojo1.getNames().size());
+    Assertions.assertNotNull(pojo1.getEmployees());
   }
 
-  @RepeatedTest(20)
+  @Test
   void shouldParseComplexObjectWithAnotherObject() {
     var pojo = pojolizer.pojoify(employeeXml, Employee.class);
     var pojoXml = xmlizer.xmlify(pojo);

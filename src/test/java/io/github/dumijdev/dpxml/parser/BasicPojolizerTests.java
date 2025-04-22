@@ -110,7 +110,7 @@ class BasicPojolizerTests {
         System.out.println("Company: " + company);
 
         Assertions.assertNotNull(company);
-        Assertions.assertNotNull(company.getEmployee());
+        Assertions.assertNotNull(company.getEmployees());
 
         System.out.println("Time: " + (System.currentTimeMillis() - init) + " ms");
 

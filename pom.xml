@@ -7,10 +7,15 @@
     <groupId>io.github.dumijdev</groupId>
     <artifactId>dp-xml</artifactId>
     <version>0.2.5</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java lib to convert xml to POJO and POJO to xml</description>
     <url>https://github.com/DumiJDev/dp-xml</url>
+    <modules>
+        <module>annotations</module>
+        <module>parsers</module>
+        <module>parsers-api</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

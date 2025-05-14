@@ -31,57 +31,57 @@ Aqui está um exemplo de como você pode usar a biblioteca para converter **POJO
 
 ```java
 
-import io.github.dumijdev.dpxml.parser.impl.pojo.BasicPojolizer;
-import io.github.dumijdev.dpxml.parser.impl.pojo.FlexBasicPojolizer;
-import io.github.dumijdev.dpxml.stereotype.*;
-import io.github.dumijdev.dpxml.parser.impl.xml.DefaultXmlizer;
+import pojo.io.github.dumijdev.dpxml.parser.BasicPojolizer;
+import pojo.io.github.dumijdev.dpxml.parser.FlexBasicPojolizer;
+import io.github.dumijdev.dpxml.annotations.*;
+import xml.io.github.dumijdev.dpxml.parser.DefaultXmlizer;
 
 import java.util.UUID;
 
 @Pojolizable //Able a class be convert to pojo
 @Xmlizable //Able a class be convert to xml
 class Student {
-    @Element(name = "name") //Optional annotation
-    @StaticAttribute(name = "title", value = "test")
-    @DynamicAttribute(name = "dynamicTitle", method = "generateTitle")
-    private String name;
+  @Element(name = "name") //Optional annotation
+  @StaticAttribute(name = "title", value = "test")
+  @DynamicAttribute(name = "dynamicTitle", method = "generateTitle")
+  private String name;
 
-    public Student() {
-        this.name = "Test";
-    }
+  public Student() {
+    this.name = "Test";
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    private String generateTitle() {
-        return UUID.randomUUID().toString();
-    }
-    
-    @DynamicAttributeGenerator(name = "generatedTitle", fields = {"name"})
-    private String generatorMethod() {
-        return "Title: %s" + name;
-    }
+  private String generateTitle() {
+    return UUID.randomUUID().toString();
+  }
+
+  @DynamicAttributeGenerator(name = "generatedTitle", fields = {"name"})
+  private String generatorMethod() {
+    return "Title: %s" + name;
+  }
 }
 
 class SimpleStudent {
-    @FlexElement(src = "data.students.student.name", dst = "name")
-    private String name;
+  @FlexElement(src = "data.students.student.name", dst = "name")
+  private String name;
 
-    public SimpleStudent() {
-    }
+  public SimpleStudent() {
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 }
 
 Xmlizer xmlizer = new DefaultXmlizer();

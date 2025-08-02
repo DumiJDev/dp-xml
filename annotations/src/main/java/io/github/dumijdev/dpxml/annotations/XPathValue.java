@@ -6,9 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
-public @interface DynamicAttributeGenerator {
-    String name();
-    String[] fields();
-    boolean ignoreMissingFields() default true;
+@Target(ElementType.FIELD)
+public @interface XPathValue {
+  String value();
 }

@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.dumijdev</groupId>
         <artifactId>dp-xml</artifactId>
-        <version>0.2.5</version>
+        <version>0.3.0</version>
     </parent>
 
     <artifactId>annotations</artifactId>
@@ -17,5 +17,11 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.dumijdev</groupId>
+            <artifactId>parsers-api</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

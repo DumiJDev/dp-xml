@@ -6,7 +6,7 @@
 
     <groupId>io.github.dumijdev</groupId>
     <artifactId>dp-xml</artifactId>
-    <version>0.2.5</version>
+    <version>0.3.0</version>
     <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java lib to convert xml to POJO and POJO to xml</description>
@@ -65,6 +65,26 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.dumijdev</groupId>
+                <artifactId>parsers</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.dumijdev</groupId>
+                <artifactId>parsers-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.dumijdev</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <finalName>dp-xml</finalName>

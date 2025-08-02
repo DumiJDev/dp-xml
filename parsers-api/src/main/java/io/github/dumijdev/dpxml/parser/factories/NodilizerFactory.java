@@ -1,14 +1,15 @@
 package io.github.dumijdev.dpxml.parser.factories;
 
-import io.github.dumijdev.dpxml.parser.api.Nodilizer;
+import io.github.dumijdev.dpxml.parser.api.AbstractNodilizer;
 
 import java.util.ServiceLoader;
 
 public abstract class NodilizerFactory {
-  private NodilizerFactory() {}
+  private NodilizerFactory() {
+  }
 
-  public Nodilizer getNodilizer() {
-    return ServiceLoader.load(Nodilizer.class)
+  public static AbstractNodilizer find() {
+    return ServiceLoader.load(AbstractNodilizer.class)
         .findFirst().orElseThrow(RuntimeException::new);
   }
 }

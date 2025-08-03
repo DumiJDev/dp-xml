@@ -1,7 +1,7 @@
 package io.github.dumijdev.dpxml.parser.xml;
 
 import io.github.dumijdev.dpxml.annotations.*;
-import io.github.dumijdev.dpxml.parser.api.Xmlizer;
+import io.github.dumijdev.dpxml.parser.api.AbstractXmlizer;
 import io.github.dumijdev.dpxml.parser.exception.InternalErrorException;
 import io.github.dumijdev.dpxml.parser.exception.UnXmlizableException;
 import io.github.dumijdev.dpxml.parser.model.Node;
@@ -39,7 +39,7 @@ import static io.github.dumijdev.dpxml.parser.utils.ParserUtils.*;
  * - Enhanced @Namespace support
  * - @DeclaredNamespaces for namespace aliases
  */
-public class DefaultXmlizer implements Xmlizer {
+public class DefaultXmlizer extends AbstractXmlizer {
 
   // Thread-safe caches for XML processing components
   private static final ThreadLocal<DocumentBuilder> DOCUMENT_BUILDER =
@@ -47,9 +47,6 @@ public class DefaultXmlizer implements Xmlizer {
 
   private static final ThreadLocal<Transformer> TRANSFORMER =
       ThreadLocal.withInitial(DefaultXmlizer::createTransformer);
-
-  // Serializer cache for performance
-  private static final Map<Class<?>, XmlSerializer<?>> SERIALIZER_CACHE = new ConcurrentHashMap<>();
 
   // Namespace registry - thread-safe
   private final Map<String, String> namespaces = new ConcurrentHashMap<>();
@@ -202,8 +199,7 @@ public class DefaultXmlizer implements Xmlizer {
 
       if (isPrimitive(value.getClass())) {
         entryElement.setTextContent(String.valueOf(value));
-      }
-      else if (Map.class.isAssignableFrom(value.getClass())) {
+      } else if (Map.class.isAssignableFrom(value.getClass())) {
         Element element = createMapElement(document, (Map<?, ?>) value, namespace);
         while (element.hasChildNodes()) {
           entryElement.appendChild(element.getFirstChild());
@@ -313,15 +309,7 @@ public class DefaultXmlizer implements Xmlizer {
    * Gets or creates a serializer instance
    */
   private XmlSerializer<?> getOrCreateSerializer(Class<? extends XmlSerializer<?>> serializerClass) {
-    return SERIALIZER_CACHE.computeIfAbsent(serializerClass, clazz -> {
-      try {
-        var constructor = clazz.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        return (XmlSerializer<?>) constructor.newInstance();
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to instantiate serializer: " + clazz.getName(), e);
-      }
-    });
+    return getSerializer(serializerClass);
   }
 
   /**

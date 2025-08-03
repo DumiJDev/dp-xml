@@ -9,6 +9,7 @@ import io.github.dumijdev.dpxml.parser.exception.InternalErrorException;
 import io.github.dumijdev.dpxml.parser.exception.UnPojolizableException;
 import io.github.dumijdev.dpxml.parser.model.Node;
 
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.time.LocalDate;
@@ -102,6 +103,10 @@ public class BasicPojolizer implements Pojolizer {
     }
 
     @Override
+    public <T> T pojoify(Reader xml, Class<T> clazz) {
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T pojoify(Node node, Class<T> clazz) {
         try {

@@ -30,7 +30,6 @@ public class ParserUtils {
     CONSIDERED_PRIMITIVES.add(String.class);
 
     CONSIDERED_PRIMITIVES.add(Date.class);
-    CONSIDERED_PRIMITIVES.add(java.sql.Date.class);
     CONSIDERED_PRIMITIVES.add(Temporal.class);
 
     CONSIDERED_PRIMITIVES.add(int.class);

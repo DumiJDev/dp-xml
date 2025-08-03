@@ -14,18 +14,15 @@ import java.util.Objects;
 public class DPXMLMapper {
   private final AbstractPojolizer pojolizer;
   private final AbstractXmlizer xmlizer;
-  private final AbstractNodilizer nodilizer;
 
   public DPXMLMapper() {
     this.pojolizer = Objects.requireNonNull(PojolizerFactory.find(), "Cannot found an implementation of Pojolizer.");
     this.xmlizer = Objects.requireNonNull(XmlizerFactory.find(), "Cannot found an implementation of Xmlizer.");
-    this.nodilizer = Objects.requireNonNull(NodilizerFactory.find(), "Cannot found an implementation of Nodilizer.");
   }
 
   public DPXMLMapper(DPXMLMapper mapper) {
     this.pojolizer = mapper.pojolizer;
     this.xmlizer = mapper.xmlizer;
-    this.nodilizer = mapper.nodilizer;
   }
 
   public <T> T toPojo(String xml, Class<T> clazz) {

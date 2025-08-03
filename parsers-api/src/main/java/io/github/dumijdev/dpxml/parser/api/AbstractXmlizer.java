@@ -11,11 +11,18 @@ public abstract class AbstractXmlizer implements Xmlizer {
   public AbstractXmlizer() {}
 
   protected XmlSerializer<?> getSerializer(Class<?> clazz) {
-    return serializers.get(clazz);
+    return serializers.computeIfAbsent(clazz, aClass -> {
+      try {
+        var constructor = aClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return (XmlSerializer<?>) constructor.newInstance();
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to instantiate serializer: " + aClass.getName(), e);
+      }
+    });
   }
 
-  public AbstractXmlizer addSerializer(Class<?> clazz, XmlSerializer<?> xmlSerializer) {
+  public void addSerializer(Class<?> clazz, XmlSerializer<?> xmlSerializer) {
     this.serializers.put(clazz, xmlSerializer);
-    return this;
   }
 }

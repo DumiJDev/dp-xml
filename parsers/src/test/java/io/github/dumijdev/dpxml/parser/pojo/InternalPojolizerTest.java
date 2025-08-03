@@ -9,6 +9,7 @@ import io.github.dumijdev.dpxml.parser.serializer.XmlDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -66,11 +67,18 @@ class InternalPojolizerTest {
   void testArrays() {
     String xml =
         "<ArrayContainer>" +
-            "<numbers>1 2 3 4 5</numbers>" +
-            "<strings>hello world test</strings>" +
+            "<numbers>1</numbers>" +
+            "<numbers>2</numbers>" +
+            "<numbers>3</numbers>" +
+            "<numbers>4</numbers>" +
+            "<numbers>5</numbers>" +
+            "<strings>hello</strings>" +
+            "<strings>world</strings>" +
+            "<strings>test</strings>" +
             "</ArrayContainer>";
 
     ArrayContainer result = pojolizer.pojoify(xml, ArrayContainer.class);
+    System.out.println(result);
 
     assertArrayEquals(new int[]{1, 2, 3, 4, 5}, result.numbers);
     assertArrayEquals(new String[]{"hello", "world", "test"}, result.strings);
@@ -81,8 +89,12 @@ class InternalPojolizerTest {
   void testCollections() {
     String xml =
         "<CollectionContainer>" +
-            "<numberList>1 2 3</numberList>" +
-            "<stringSet>a b c</stringSet>" +
+            "<numberList>1</numberList>" +
+            "<numberList>2</numberList>" +
+            "<numberList>3</numberList>" +
+            "<stringSet>a</stringSet>" +
+            "<stringSet>b</stringSet>" +
+            "<stringSet>c</stringSet>" +
             "</CollectionContainer>";
 
     CollectionContainer result = pojolizer.pojoify(xml, CollectionContainer.class);
@@ -190,6 +202,14 @@ class InternalPojolizerTest {
   static class ArrayContainer {
     private int[] numbers;
     private String[] strings;
+
+    @Override
+    public String toString() {
+      return "ArrayContainer{" +
+          "numbers=" + Arrays.toString(numbers) +
+          ", strings=" + Arrays.toString(strings) +
+          '}';
+    }
   }
 
   static class CollectionContainer {

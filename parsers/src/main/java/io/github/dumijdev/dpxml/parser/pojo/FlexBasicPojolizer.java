@@ -9,13 +9,14 @@ import io.github.dumijdev.dpxml.annotations.FlexElement;
 import io.github.dumijdev.dpxml.annotations.IgnoreElement;
 import io.github.dumijdev.dpxml.annotations.Pojolizable;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class FlexBasicPojolizer implements Pojolizer {
-  private final ThreadLocal<Pojolizer> basic = ThreadLocal.withInitial(BasicPojolizer::new);
+  private final ThreadLocal<BasicPojolizer> basic = ThreadLocal.withInitial(BasicPojolizer::new);
   private final ThreadLocal<Nodilizer> nodilizer = ThreadLocal.withInitial(DefaultNodilizer::new);
 
   private void clear() {
@@ -38,6 +39,10 @@ public class FlexBasicPojolizer implements Pojolizer {
   }
 
   @Override
+  public <T> T pojoify(Reader xml, Class<T> clazz) {
+    return null;
+  }
+  
   @SuppressWarnings("unchecked")
   public <T> T pojoify(Node node, Class<T> clazz) {
     if (String.class.equals(clazz)) {

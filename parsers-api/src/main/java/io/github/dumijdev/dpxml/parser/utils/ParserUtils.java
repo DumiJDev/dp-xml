@@ -42,26 +42,6 @@ public class ParserUtils {
     CONSIDERED_PRIMITIVES.add(char.class);
   }
 
-  public static String stringifyXml(Node node) throws TransformerException {
-    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-    Transformer transformer = transformerFactory.newTransformer();
-    transformer.setOutputProperty(OutputKeys.INDENT, "no");
-    DOMSource domSource = new DOMSource(node);
-
-    StringWriter writer = new StringWriter();
-    StreamResult result = new StreamResult(writer);
-
-    transformer.transform(domSource, result);
-
-    return writer.toString();
-  }
-
-  public static Node findNode(Element parent, String name) {
-    var nodes = findNodes(parent, name);
-
-    return nodes.isEmpty() ? null : nodes.get(0);
-  }
-
   public static List<Node> findNodes(Element parent, String name) {
     List<Node> out = new LinkedList<>();
 

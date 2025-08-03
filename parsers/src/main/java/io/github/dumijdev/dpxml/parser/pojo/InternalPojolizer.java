@@ -1,6 +1,7 @@
 package io.github.dumijdev.dpxml.parser.pojo;
 
 import io.github.dumijdev.dpxml.annotations.XmlDeserialize;
+import io.github.dumijdev.dpxml.deserializers.DateDeserializer;
 import io.github.dumijdev.dpxml.parser.api.AbstractPojolizer;
 import io.github.dumijdev.dpxml.parser.exception.InternalErrorException;
 import io.github.dumijdev.dpxml.parser.exception.XmlProcessingException;
@@ -12,8 +13,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +51,12 @@ public class InternalPojolizer extends AbstractPojolizer {
   private final XmlElementReader xmlElementReader = new XmlElementReader();
   private final InheritanceHandler inheritanceHandler = new InheritanceHandler(typeRegistry);
   private final InterfaceProxyFactory interfaceProxyFactory = new InterfaceProxyFactory(this);
+
+  public InternalPojolizer() {
+    super();
+
+    addDeserializer(Date.class, new DateDeserializer());
+  }
 
   @Override
   public <T> T pojoify(Reader reader, Class<T> clazz) {

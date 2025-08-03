@@ -2,27 +2,49 @@ package io.github.dumijdev.dpxml.parser.api;
 
 import io.github.dumijdev.dpxml.parser.serializer.XmlSerializer;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class AbstractXmlizer implements Xmlizer {
   private final Map<Class<?>, XmlSerializer<?>> serializers = new HashMap<>();
 
-  public AbstractXmlizer() {}
-
-  protected XmlSerializer<?> getSerializer(Class<?> clazz) {
-    return serializers.computeIfAbsent(clazz, aClass -> {
-      try {
-        var constructor = aClass.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        return (XmlSerializer<?>) constructor.newInstance();
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to instantiate serializer: " + aClass.getName(), e);
-      }
-    });
+  public AbstractXmlizer() {
+    initializeDefaultSerializers();
   }
 
-  public void addSerializer(Class<?> clazz, XmlSerializer<?> xmlSerializer) {
-    this.serializers.put(clazz, xmlSerializer);
+  private void initializeDefaultSerializers() {
+    addSerializer(int.class, Objects::toString);
+    addSerializer(Integer.class, (Integer val) -> Integer.toString(val));
+    addSerializer(float.class, (Float val) -> Float.toString(val));
+    addSerializer(Float.class, (Float val) -> Float.toString(val));
+    addSerializer(double.class, (Double val) -> Double.toString(val));
+    addSerializer(Double.class, (Double val) -> Double.toString(val));
+    addSerializer(long.class, (Long val) -> Long.toString(val));
+    addSerializer(Long.class, (Long val) -> Long.toString(val));
+    addSerializer(boolean.class, (Boolean val) -> Boolean.toString(val));
+    addSerializer(Boolean.class, (Boolean val) -> Boolean.toString(val));
+    addSerializer(String.class, (String val) -> val);
+    addSerializer(Character.class, Object::toString);
+    addSerializer(char.class, Object::toString);
+    addSerializer(Byte.class, (Byte val) -> Byte.toString(val));
+    addSerializer(byte.class, (Byte val) -> Byte.toString(val));
+    addSerializer(Short.class, (Short val) -> Short.toString(val));
+    addSerializer(short.class, (Short val) -> Short.toString(val));
+
+    addSerializer(BigDecimal.class, BigDecimal::toString);
+    addSerializer(BigInteger.class, BigInteger::toString);
+  }
+
+  protected XmlSerializer<?> getSerializer(Class<?> clazz) {
+    return serializers.get(clazz);
+  }
+
+  public <T> void addSerializer(Class<T> clazz, XmlSerializer<T> xmlSerializer) {
+    serializers.put(clazz, xmlSerializer);
   }
 }

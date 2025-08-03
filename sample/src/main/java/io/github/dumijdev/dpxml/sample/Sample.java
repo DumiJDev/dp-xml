@@ -5,6 +5,7 @@ import io.github.dumijdev.dpxml.annotations.Pojolizable;
 import io.github.dumijdev.dpxml.annotations.Xmlizable;
 import io.github.dumijdev.dpxml.parser.DPXMLMapper;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Sample {
@@ -25,7 +26,7 @@ public class Sample {
       public String toString() {
         return "SampleClass{" +
             "name='" + name + '\'' +
-            ", today=" + today +
+            ", today=" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSSSS").format(today) +
             '}';
       }
     }

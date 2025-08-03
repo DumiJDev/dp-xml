@@ -37,12 +37,12 @@ public class DPXMLMapper {
     return new DPXMLMapper(this);
   }
 
-  public DPXMLMapper addSerializer(Class<?> clazz, XmlSerializer<?> xmlSerializer) {
+  public <T> DPXMLMapper addSerializer(Class<T> clazz, XmlSerializer<T> xmlSerializer) {
     xmlizer.addSerializer(clazz, xmlSerializer);
     return this;
   }
 
-  public DPXMLMapper addDeserializer(Class<?> clazz, XmlDeserializer<?> xmlDeserializer) {
+  public <T> DPXMLMapper addDeserializer(Class<T> clazz, XmlDeserializer<T> xmlDeserializer) {
     pojolizer.addDeserializer(clazz, xmlDeserializer);
     return this;
   }

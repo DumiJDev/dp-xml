@@ -171,10 +171,18 @@ public class ConstructorResolver {
 
     Parameter param = paramInfo.parameter;
     Class<?> paramType = param.getType();
+    var name = getParameterElementName(param);
 
     // Handle custom deserializers
     if (param.isAnnotationPresent(XmlDeserialize.class)) {
       args[paramInfo.index] = processCustomDeserializerParameter(param, reader);
+      return;
+    }
+
+    var deserializer = pojolizer.getDeserializer(paramType);
+
+    if (deserializer != null) {
+      args[paramInfo.index] = deserializer.deserialize(xmlElementReader.captureElementText(reader));
       return;
     }
 
@@ -190,7 +198,7 @@ public class ConstructorResolver {
       args[paramInfo.index] = pojolizer.convertValue(value, paramType);
     } else {
       // Complex object
-      Object paramValue = pojolizer.parseObject(reader, paramType, context.withPath(param.getName()));
+      Object paramValue = pojolizer.parseObject(reader, paramType, context.withPath(name));
       args[paramInfo.index] = paramValue;
     }
   }

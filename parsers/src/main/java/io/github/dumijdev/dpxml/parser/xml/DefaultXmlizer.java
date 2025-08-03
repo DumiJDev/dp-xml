@@ -7,6 +7,7 @@ import io.github.dumijdev.dpxml.parser.exception.UnXmlizableException;
 import io.github.dumijdev.dpxml.parser.model.Node;
 import io.github.dumijdev.dpxml.parser.serializer.XmlSerializer;
 import io.github.dumijdev.dpxml.parser.utils.Attributes;
+import io.github.dumijdev.dpxml.serializers.DateSerializer;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -90,6 +91,11 @@ public class DefaultXmlizer extends AbstractXmlizer {
     } catch (Exception e) {
       throw new RuntimeException("Failed to create Transformer", e);
     }
+  }
+
+  public DefaultXmlizer() {
+    super();
+    addSerializer(Date.class, new DateSerializer());
   }
 
   /**
@@ -308,13 +314,20 @@ public class DefaultXmlizer extends AbstractXmlizer {
   /**
    * Gets or creates a serializer instance
    */
-  private XmlSerializer<?> getOrCreateSerializer(Class<? extends XmlSerializer<?>> serializerClass) {
-    return getSerializer(serializerClass);
+  private XmlSerializer<?> getOrCreateSerializer(Class<?> serializerClass) {
+    var serializer = getSerializer(serializerClass);
+
+    if (serializer == null) {
+      throw new IllegalArgumentException("Serializer class " + serializerClass.getName() + " not found");
+    }
+
+    return serializer;
   }
 
   /**
    * Processes collection fields
    */
+  @SuppressWarnings("unchecked")
   private void processCollectionField(Document document, Element parentElement, Field field,
                                       String fieldName, Collection<?> values, Map<String, String> attributes,
                                       String namespace, Object parentObj) throws InvocationTargetException, IllegalAccessException {
@@ -338,7 +351,8 @@ public class DefaultXmlizer extends AbstractXmlizer {
       }
 
       if (isPrimitive(element.getClass())) {
-        xmlElement.setTextContent(String.valueOf(element));
+        var serializer = (XmlSerializer<Object>) getOrCreateSerializer(field.getType());
+        xmlElement.setTextContent(serializer.serialize(element));
       } else {
         Element nestedElement = createObjectElement(document, element, fieldName, namespace);
         // Move children from nested to current element
@@ -423,7 +437,8 @@ public class DefaultXmlizer extends AbstractXmlizer {
     }
 
     if (isPrimitive(field.getType())) {
-      xmlElement.setTextContent(String.valueOf(fieldValue));
+      var serializer = (XmlSerializer<Object>) getOrCreateSerializer(field.getType());
+      xmlElement.setTextContent(serializer.serialize(fieldValue));
     } else {
       Element nestedElement = createObjectElement(document, fieldValue, fieldName, namespace);
       while (nestedElement.hasChildNodes()) {

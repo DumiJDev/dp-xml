@@ -111,6 +111,12 @@ public class FieldProcessor {
     field.setAccessible(true);
     Class<?> fieldType = field.getType();
 
+    var deserializer = pojolizer.getDeserializer(fieldType);
+    if (deserializer != null) {
+      field.set(instance, deserializer.deserialize(xmlElementReader.captureElementText(reader)));
+      return;
+    }
+
     // Handle custom deserializers
     if (field.isAnnotationPresent(XmlDeserialize.class)) {
       processCustomDeserializerField(instance, field, reader);

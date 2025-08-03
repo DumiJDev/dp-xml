@@ -35,7 +35,7 @@ public abstract class AbstractPojolizer implements Pojolizer {
     initializeDefaultDeserializers();
   }
 
-  public void addDeserializer(Class<?> clazz, XmlDeserializer<?> xmlDeserializer) {
+  public <T> void addDeserializer(Class<T> clazz, XmlDeserializer<T> xmlDeserializer) {
     this.deserializers.put(clazz, xmlDeserializer);
   }
 

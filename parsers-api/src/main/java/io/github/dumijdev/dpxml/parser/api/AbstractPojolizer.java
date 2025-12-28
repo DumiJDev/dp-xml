@@ -40,15 +40,7 @@ public abstract class AbstractPojolizer implements Pojolizer {
   }
 
   public XmlDeserializer<?> getDeserializer(Class<?> clazz) {
-    return deserializers.computeIfAbsent(clazz, aClass -> {
-      try {
-        var constructor =  aClass.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        return (XmlDeserializer<?>) constructor.newInstance();
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to instantiate deserializer: " + aClass.getName(), e);
-      }
-    });
+    return deserializers.get(clazz);
   }
 
   public boolean isPrimitiveOrString(Class<?> clazz) {
@@ -56,7 +48,13 @@ public abstract class AbstractPojolizer implements Pojolizer {
   }
 
   private void initializeDefaultDeserializers() {
-    deserializers.put(String.class, s -> s);
+    deserializers.put(String.class, field -> {
+      if (field == null || field.isEmpty()) {
+        return null;
+      }
+
+      return field;
+    });
     deserializers.put(Integer.class, Integer::parseInt);
     deserializers.put(int.class, Integer::parseInt);
     deserializers.put(Long.class, Long::parseLong);
@@ -77,6 +75,7 @@ public abstract class AbstractPojolizer implements Pojolizer {
 
   public Object convertValue(String value, Class<?> targetType) {
     if (value == null || value.isEmpty()) {
+      System.out.println(value + " is null or empty, returning default value for type: " + targetType);
       return getDefaultValue(targetType);
     }
 

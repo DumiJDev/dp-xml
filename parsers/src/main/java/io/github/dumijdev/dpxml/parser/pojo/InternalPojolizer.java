@@ -113,6 +113,11 @@ public class InternalPojolizer extends AbstractPojolizer {
     String elementText = xmlElementReader.captureElementText(reader);
     XmlDeserializer<T> deserializer = (XmlDeserializer<T>) getDeserializer(annotation.using());
 
+    if (deserializer == null) {
+      deserializer = (XmlDeserializer<T>) annotation.using().getDeclaredConstructor().newInstance();
+      addDeserializer(clazz, deserializer);
+    }
+
     return Optional.of(deserializer.deserialize(elementText));
   }
 

@@ -16,17 +16,17 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.github.dumijdev</groupId>
+      <groupId>io.github.dumijdev.dpxml</groupId>
       <artifactId>annotations</artifactId>
       <version>0.3.0</version>
     </dependency>
     <dependency>
-      <groupId>io.github.dumijdev</groupId>
+      <groupId>io.github.dumijdev.dpxml</groupId>
       <artifactId>parsers-api</artifactId>
       <version>0.3.0</version>
     </dependency>
     <dependency>
-      <groupId>io.github.dumijdev</groupId>
+      <groupId>io.github.dumijdev.dpxml</groupId>
       <artifactId>parsers</artifactId>
       <version>0.3.0</version>
     </dependency>

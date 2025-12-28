@@ -11,4 +11,8 @@ public @interface Element {
   String name() default "";
 
   String namespace() default "";
+
+  boolean required() default false;
+
+  String defaultValue() default "";
 }

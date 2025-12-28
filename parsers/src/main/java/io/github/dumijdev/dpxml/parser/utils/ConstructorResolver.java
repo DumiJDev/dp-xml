@@ -6,11 +6,21 @@ import io.github.dumijdev.dpxml.annotations.XPathValue;
 import io.github.dumijdev.dpxml.annotations.XmlDeserialize;
 import io.github.dumijdev.dpxml.parser.pojo.InternalPojolizer;
 import io.github.dumijdev.dpxml.parser.serializer.XmlDeserializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Handles constructor resolution and argument creation with advanced Element binding
@@ -188,11 +198,50 @@ public class ConstructorResolver {
 
     // Handle different parameter types
     if (paramType.isArray()) {
-      args[paramInfo.index] = processArrayParameter(param, reader, context);
+      var value = processArrayParameter(param, reader, context);
+
+      var array = args[paramInfo.index];
+
+      if (array == null) {
+        array = Array.newInstance(paramType.getComponentType(), 1);
+        Array.set(array, 0, value);
+        args[paramInfo.index] = array;
+      } else {
+        var length = Array.getLength(array);
+        var newArray = Array.newInstance(paramType.getComponentType(), length + 1);
+        System.arraycopy(array, 0, newArray, 0, length);
+        Array.set(newArray, length, value);
+        args[paramInfo.index] = newArray;
+      }
+
     } else if (Collection.class.isAssignableFrom(paramType)) {
-      args[paramInfo.index] = processCollectionParameter(param, reader, context);
+      var collection = args[paramInfo.index];
+      var value = processCollectionParameter(param, reader, context);
+
+      if (collection == null) {
+        collection = createCollection(paramType);
+      }
+
+      if (value != null) {
+        ((Collection<Object>) collection).add(value);
+      }
+
+      args[paramInfo.index] = collection;
+
     } else if (Map.class.isAssignableFrom(paramType)) {
-      args[paramInfo.index] = processMapParameter(param, reader);
+      var map = args[paramInfo.index];
+
+      if (map == null) {
+        map = new LinkedHashMap<>();
+        args[paramInfo.index] = map;
+      }
+
+      var value = processMapParameter(param, reader);
+
+      if (value != null) {
+        ((Map<Object, Object>) map).put(name, value);
+      }
+
     } else if (pojolizer.isPrimitiveOrString(paramType)) {
       String value = xmlElementReader.readElementText(reader);
       args[paramInfo.index] = pojolizer.convertValue(value, paramType);
@@ -213,7 +262,6 @@ public class ConstructorResolver {
   private Object processArrayParameter(Parameter param, XMLStreamReader reader,
                                        XmlContext context) throws Exception {
     Class<?> componentType = param.getType().getComponentType();
-    List<Object> tempList = new ArrayList<>();
 
     Object value = null;
     if (pojolizer.isPrimitiveOrString(componentType)) {
@@ -223,35 +271,20 @@ public class ConstructorResolver {
       value = pojolizer.parseObject(reader, componentType, context);
     }
 
-    if (value != null) {
-      tempList.add(value);
-    }
-
-    // Convert list to array
-    Object array = Array.newInstance(componentType, tempList.size());
-    for (int i = 0; i < tempList.size(); i++) {
-      Array.set(array, i, tempList.get(i));
-    }
-
-    return array;
+    return value;
   }
 
   private Object processCollectionParameter(Parameter param, XMLStreamReader reader,
                                             XmlContext context) throws Exception {
     Type genericType = param.getParameterizedType();
     Class<?> componentType = extractGenericType(genericType, 0);
-    Class<?> collectionType = param.getType();
-
-    Collection<Object> collection = createCollection(collectionType);
 
     if (pojolizer.isPrimitiveOrString(componentType)) {
       String elementText = xmlElementReader.readElementText(reader);
-      collection.add(pojolizer.convertValue(elementText, componentType));
+      return pojolizer.convertValue(elementText, componentType);
     } else {
-      collection.add(pojolizer.parseObject(reader, componentType, context));
+      return pojolizer.parseObject(reader, componentType, context);
     }
-
-    return collection;
   }
 
   private Object processMapParameter(Parameter param, XMLStreamReader reader) throws Exception {
@@ -259,20 +292,45 @@ public class ConstructorResolver {
     Class<?> keyType = extractGenericType(genericType, 0);
     Class<?> valueType = extractGenericType(genericType, 1);
 
-    Map<Object, Object> map = new LinkedHashMap<>();
     String elementText = xmlElementReader.captureElementText(reader);
 
-    // Parse key-value pairs (assuming format like "key1=value1 key2=value2")
-    String[] pairs = elementText.trim().split("\\s+");
-    for (String pair : pairs) {
-      String[] kv = pair.split("=", 2);
-      if (kv.length == 2) {
-        Object key = pojolizer.convertValue(kv[0], keyType);
-        Object value = pojolizer.convertValue(kv[1], valueType);
+    return xmlToMap(elementText);
+  }
+
+  public Map<String, Object> xmlToMap(String xml) throws Exception {
+    // Criação do DocumentBuilderFactory para fazer o parse do XML
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder builder = factory.newDocumentBuilder();
+
+    // Criação de um InputStream a partir da String XML
+    InputStream inputStream = new ByteArrayInputStream(xml.getBytes(UTF_8));
+
+    // Parse do XML
+    Document document = builder.parse(inputStream);
+
+    // Mapeamento do XML para Map
+    return parseElement(document.getDocumentElement());
+  }
+
+  private Map<String, Object> parseElement(org.w3c.dom.Element element) {
+    Map<String, Object> map = new HashMap<>();
+
+    // Obtendo todas as tags filhos do elemento
+    NodeList childNodes = element.getChildNodes();
+
+    for (int i = 0; i < childNodes.getLength(); i++) {
+      Node node = childNodes.item(i);
+
+      // Verifica se o nó é do tipo Element
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        var childElement = (org.w3c.dom.Element) node;
+        var key = childElement.getTagName();
+        var value = childElement.getTextContent().trim();
+
+        // Adiciona ao Map
         map.put(key, value);
       }
     }
-
     return map;
   }
 
@@ -310,7 +368,7 @@ public class ConstructorResolver {
     Element elementAnnotation = param.getAnnotation(Element.class);
     if (elementAnnotation != null) {
       // Assuming Element annotation has a defaultValue field
-      // return elementAnnotation.defaultValue();
+      return elementAnnotation.defaultValue();
     }
     return null;
   }

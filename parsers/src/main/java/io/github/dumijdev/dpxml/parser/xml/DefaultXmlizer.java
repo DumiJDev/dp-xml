@@ -57,6 +57,11 @@ public class DefaultXmlizer extends AbstractXmlizer {
   private String encoding = "UTF-8";
   private boolean omitXmlDeclaration = true;
 
+  public DefaultXmlizer() {
+    super();
+    addSerializer(Date.class, new DateSerializer());
+  }
+
   /**
    * Factory methods for thread-local instances
    */
@@ -91,11 +96,6 @@ public class DefaultXmlizer extends AbstractXmlizer {
     } catch (Exception e) {
       throw new RuntimeException("Failed to create Transformer", e);
     }
-  }
-
-  public DefaultXmlizer() {
-    super();
-    addSerializer(Date.class, new DateSerializer());
   }
 
   /**
@@ -286,7 +286,11 @@ public class DefaultXmlizer extends AbstractXmlizer {
     var serializerClass = annotation.using();
 
     try {
-      XmlSerializer<Object> serializer = (XmlSerializer<Object>) getOrCreateSerializer(serializerClass);
+      XmlSerializer<Object> serializer = (XmlSerializer<Object>) getSerializer(serializerClass);
+      if (serializer == null) {
+        serializer = (XmlSerializer<Object>) serializerClass.getDeclaredConstructor().newInstance();
+        addSerializer(serializerClass, serializer);
+      }
       String serializedXml = serializer.serialize(fieldValue);
 
       // Parse the serialized XML and append to parent
@@ -309,19 +313,6 @@ public class DefaultXmlizer extends AbstractXmlizer {
     } catch (Exception e) {
       throw new IllegalAccessException("Failed to serialize field " + field.getName() + ": " + e.getMessage());
     }
-  }
-
-  /**
-   * Gets or creates a serializer instance
-   */
-  private XmlSerializer<?> getOrCreateSerializer(Class<?> serializerClass) {
-    var serializer = getSerializer(serializerClass);
-
-    if (serializer == null) {
-      throw new IllegalArgumentException("Serializer class " + serializerClass.getName() + " not found");
-    }
-
-    return serializer;
   }
 
   /**
@@ -351,7 +342,10 @@ public class DefaultXmlizer extends AbstractXmlizer {
       }
 
       if (isPrimitive(element.getClass())) {
-        var serializer = (XmlSerializer<Object>) getOrCreateSerializer(field.getType());
+        var serializer = (XmlSerializer<Object>) getSerializer(element.getClass());
+        if (serializer == null) {
+          throw new IllegalAccessException("No serializer found for primitive type " + element.getClass().getName());
+        }
         xmlElement.setTextContent(serializer.serialize(element));
       } else {
         Element nestedElement = createObjectElement(document, element, fieldName, namespace);
@@ -411,6 +405,7 @@ public class DefaultXmlizer extends AbstractXmlizer {
   /**
    * Processes single (non-collection) fields
    */
+  @SuppressWarnings("unchecked")
   private void processSingleField(Document document, Element parentElement, Field field,
                                   String fieldName, Object fieldValue, Map<String, String> attributes,
                                   String namespace, Object parentObj) throws InvocationTargetException, IllegalAccessException {
@@ -437,8 +432,12 @@ public class DefaultXmlizer extends AbstractXmlizer {
     }
 
     if (isPrimitive(field.getType())) {
-      var serializer = (XmlSerializer<Object>) getOrCreateSerializer(field.getType());
-      xmlElement.setTextContent(serializer.serialize(fieldValue));
+      var serializer = getSerializer(fieldValue.getClass());
+      if (serializer == null) {
+        xmlElement.setTextContent(String.valueOf(fieldValue));
+      } else {
+        xmlElement.setTextContent(((XmlSerializer<Object>)serializer).serialize(fieldValue));
+      }
     } else {
       Element nestedElement = createObjectElement(document, fieldValue, fieldName, namespace);
       while (nestedElement.hasChildNodes()) {

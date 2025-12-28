@@ -18,6 +18,7 @@ public abstract class AbstractXmlizer implements Xmlizer {
   }
 
   private void initializeDefaultSerializers() {
+    addSerializer(String.class, (String val) -> val);
     addSerializer(int.class, Objects::toString);
     addSerializer(Integer.class, (Integer val) -> Integer.toString(val));
     addSerializer(float.class, (Float val) -> Float.toString(val));
@@ -36,15 +37,15 @@ public abstract class AbstractXmlizer implements Xmlizer {
     addSerializer(Short.class, (Short val) -> Short.toString(val));
     addSerializer(short.class, (Short val) -> Short.toString(val));
 
-    addSerializer(BigDecimal.class, BigDecimal::toString);
-    addSerializer(BigInteger.class, BigInteger::toString);
+    addSerializer(BigDecimal.class, (BigDecimal val) -> val.toPlainString());
+    addSerializer(BigInteger.class, (BigInteger val) -> val.toString());
   }
 
   protected XmlSerializer<?> getSerializer(Class<?> clazz) {
     return serializers.get(clazz);
   }
 
-  public <T> void addSerializer(Class<T> clazz, XmlSerializer<T> xmlSerializer) {
-    serializers.put(clazz, xmlSerializer);
+  public void addSerializer(Class<?> clazz1, XmlSerializer<?> xmlSerializer) {
+    serializers.put(clazz1, xmlSerializer);
   }
 }
